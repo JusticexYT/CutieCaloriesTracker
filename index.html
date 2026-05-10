@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CalorieCutie 🍓</title>
+<link rel="manifest" id="pwa-manifest">
+<meta name="theme-color" content="#e8617a">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#e8617a;--primary-light:#fdeef1;--primary-dark:#c44460;--accent:#f7b7c2;--soft:#fff6f8;--text:#2a1a1f;--text-muted:#7a5a62;--text-light:#b89da3;--surface:#fff;--surface2:#fdf2f4;--border:#f0dde2;--success:#4caf88;--warning:#f0a84b;--danger:#e05555;--radius:18px;--shadow:0 4px 24px rgba(232,97,122,.10)}
+[data-theme="dark"]{--primary:#f07f97;--primary-light:#3a1e25;--primary-dark:#f5a0b5;--accent:#7a3a4a;--soft:#1e1215;--text:#f9eef0;--text-muted:#c49aa5;--text-light:#7a5a62;--surface:#281820;--surface2:#341e28;--border:#4a2a35;--success:#5dbf97;--warning:#f0b86a;--danger:#e87070;--shadow:0 4px 24px rgba(0,0,0,.3)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--soft);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+h1,h2,h3{font-family:'Fraunces',serif}
+.nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:58px;box-shadow:var(--shadow)}
+.nav-logo{font-family:'Fraunces',serif;font-size:1.3rem;color:var(--primary);font-weight:700}
+.nav-right{display:flex;gap:6px;align-items:center}
+.icon-btn{background:none;border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-muted);transition:all .2s}
+.icon-btn:hover{background:var(--primary-light);color:var(--primary)}
+.page{display:none;padding:1.2rem 1rem 5rem;max-width:680px;margin:0 auto}
+.page.active{display:block}
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:1.25rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+.card-title{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;color:var(--text);margin-bottom:1rem}
+.section-head{font-family:'Fraunces',serif;font-size:1.25rem;font-weight:700;color:var(--text);margin-bottom:1rem}
+.greeting-card{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;color:#fff;position:relative;overflow:hidden}
+.greeting-card::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.10)}
+.greeting-name{font-size:1.6rem;font-weight:700;margin-bottom:4px}
+.greeting-sub{font-size:.85rem;opacity:.85}
+.greeting-note{margin-top:1rem;background:rgba(255,255,255,.18);border-radius:12px;padding:10px 14px;font-size:.85rem;font-style:italic;cursor:pointer}
+.countdown-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:.8rem;margin-top:8px;margin-right:6px}
+.milestone-pop{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--primary);color:#fff;padding:10px 20px;border-radius:20px;font-size:.85rem;font-weight:600;z-index:500;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.milestone-pop.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.ring-wrap{display:flex;align-items:center;gap:1.5rem;margin-bottom:1rem}
+.ring-stats{flex:1}
+.ring-label{font-size:12px;color:var(--text-muted);margin-bottom:2px}
+.ring-value{font-family:'Fraunces',serif;font-size:2rem;font-weight:700;color:var(--primary)}
+.ring-remaining{font-size:13px;color:var(--text-muted);margin-top:4px}
+.macro-row{display:flex;gap:8px;margin-bottom:1rem}
+.macro-chip{flex:1;background:var(--surface2);border-radius:12px;padding:10px;text-align:center}
+.macro-chip-label{font-size:11px;color:var(--text-muted);margin-bottom:3px}
+.macro-chip-val{font-size:1.1rem;font-weight:600;color:var(--text)}
+.macro-chip-unit{font-size:10px;color:var(--text-light)}
+.macro-bar{height:5px;border-radius:4px;background:var(--border);margin-top:6px;overflow:hidden}
+.macro-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+.water-row{display:flex;gap:8px;flex-wrap:wrap}
+.water-drop{width:32px;height:32px;cursor:pointer;transition:transform .2s;font-size:22px;display:flex;align-items:center;justify-content:center}
+.water-drop:hover{transform:scale(1.2)}
+.mood-row{display:flex;gap:8px;justify-content:space-around;margin:1rem 0}
+.mood-btn{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:2px solid var(--border);border-radius:14px;padding:10px 8px;cursor:pointer;transition:all .2s;font-size:1.4rem}
+.mood-btn span{font-size:10px;color:var(--text-muted)}
+.mood-btn:hover,.mood-btn.selected{border-color:var(--primary);background:var(--primary-light)}
+.sleep-stars{display:flex;gap:6px;justify-content:center;margin:1rem 0}
+.sleep-star{font-size:1.8rem;cursor:pointer;transition:transform .2s;opacity:.3}
+.sleep-star.active{opacity:1}
+.sleep-star:hover{transform:scale(1.2)}
+.streak-banner{background:linear-gradient(135deg,var(--warning) 0%,#f08c1a 100%);border-radius:14px;padding:14px 18px;color:#fff;display:flex;align-items:center;gap:12px;margin-bottom:1rem}
+.streak-num{font-family:'Fraunces',serif;font-size:2rem;font-weight:700}
+.affirmation-card{background:var(--surface2);border-radius:14px;padding:1.2rem;text-align:center;margin-bottom:1rem;border:1px solid var(--border)}
+.affirmation-text{font-family:'Fraunces',serif;font-size:1.05rem;font-style:italic;color:var(--text);line-height:1.5}
+.meal-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.meal-section-name{font-weight:600;font-size:.9rem;color:var(--text)}
+.meal-section-cals{font-size:.8rem;color:var(--text-muted)}
+.meal-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.meal-item:last-child{border-bottom:none}
+.meal-item-name{font-size:.88rem;color:var(--text)}
+.meal-item-detail{font-size:.78rem;color:var(--text-muted)}
+.meal-item-cals{font-size:.88rem;font-weight:600;color:var(--primary)}
+.meal-item-del{background:none;border:none;cursor:pointer;color:var(--text-light);font-size:16px;padding:2px 6px}
+.meal-item-del:hover{color:var(--danger)}
+.add-food-btn{width:100%;background:var(--primary-light);border:1.5px dashed var(--accent);border-radius:12px;padding:10px;color:var(--primary);font-size:.85rem;font-weight:500;cursor:pointer;margin-top:8px;transition:all .2s;font-family:'DM Sans',sans-serif}
+.add-food-btn:hover{background:var(--primary);color:#fff;border-style:solid}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem;width:100%;max-width:680px;transform:translateY(100%);transition:transform .3s;max-height:92vh;overflow-y:auto}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1rem}
+.modal-title{font-family:'Fraunces',serif;font-size:1.2rem;margin-bottom:1rem;color:var(--text)}
+.form-group{margin-bottom:1rem}
+.form-label{font-size:13px;color:var(--text-muted);margin-bottom:5px;display:block;font-weight:500}
+.form-input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;color:var(--text);background:var(--surface2);transition:border .2s;font-family:'DM Sans',sans-serif;outline:none}
+.form-input:focus{border-color:var(--primary)}
+.form-row{display:flex;gap:10px}
+.form-row .form-group{flex:1}
+.btn-primary{background:var(--primary);color:#fff;border:none;border-radius:14px;padding:12px 24px;font-size:15px;font-weight:600;cursor:pointer;width:100%;font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.btn-secondary{background:var(--surface2);color:var(--text-muted);border:1px solid var(--border);border-radius:14px;padding:10px 18px;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:8px}
+.btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+select.form-input{appearance:none}
+.inner-tabs{display:flex;gap:6px;margin-bottom:1rem;overflow-x:auto;padding-bottom:2px}
+.inner-tab{flex-shrink:0;padding:8px 14px;border-radius:12px;border:1.5px solid var(--border);background:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-muted);font-family:'DM Sans',sans-serif;transition:all .2s}
+.inner-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.badges-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.badge-item{text-align:center;padding:12px 8px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface2)}
+.badge-item.earned{border-color:var(--warning);background:#fff9f0}
+[data-theme="dark"] .badge-item.earned{background:#3a2a10}
+.badge-emoji{font-size:1.8rem;display:block;margin-bottom:4px}
+.badge-name{font-size:10px;color:var(--text-muted);font-weight:500}
+.badge-item.locked .badge-emoji{filter:grayscale(1) opacity(.4)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:.5rem}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500}
+.cal-day.hit{background:var(--primary);color:#fff}
+.cal-day.over{background:var(--danger);color:#fff}
+.cal-day.empty{background:var(--surface2);color:var(--text-light)}
+.cal-day.future{opacity:.3}
+.cal-day.today{outline:2px solid var(--primary);outline-offset:1px}
+.cal-header-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+.cal-header-days span{text-align:center;font-size:10px;color:var(--text-muted);font-weight:600}
+.week-chart{display:flex;align-items:flex-end;gap:6px;height:80px;margin:1rem 0}
+.week-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.week-bar-outer{width:100%;background:var(--surface2);border-radius:6px;height:64px;display:flex;align-items:flex-end;overflow:hidden}
+.week-bar-inner{width:100%;border-radius:6px;background:var(--primary);transition:height .5s}
+.week-bar-inner.over{background:var(--danger)}
+.week-day{font-size:10px;color:var(--text-muted)}
+.fav-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.fav-name{font-size:.9rem;font-weight:500;color:var(--text)}
+.fav-detail{font-size:.78rem;color:var(--text-muted)}
+.quick-add-btn{background:var(--primary-light);color:var(--primary);border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.quick-add-btn:hover{background:var(--primary);color:#fff}
+.partner-note-card{background:linear-gradient(135deg,#ffeaf0,#fff0f5);border:1.5px solid #f7c4d0;border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
+[data-theme="dark"] .partner-note-card{background:linear-gradient(135deg,#3a1520,#2a1020);border-color:#6a2535}
+.note-from{font-size:11px;color:var(--primary);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.note-text{font-size:.95rem;color:var(--text);font-style:italic;line-height:1.5}
+.grocery-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.grocery-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.grocery-check.checked{background:var(--success);border-color:var(--success);color:#fff;font-size:12px}
+.grocery-text{flex:1;font-size:.9rem;color:var(--text)}
+.grocery-text.done{text-decoration:line-through;color:var(--text-light)}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.setting-label{font-size:.9rem;color:var(--text)}
+.setting-sub{font-size:.78rem;color:var(--text-muted)}
+.toggle{width:44px;height:24px;border-radius:12px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:var(--primary)}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s}
+.toggle.on::after{left:23px}
+.color-swatches{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1rem}
+.swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border .2s}
+.swatch.selected{border-color:var(--text)}
+.profile-avatar{width:72px;height:72px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;border:3px solid var(--primary);margin:0 auto 1rem}
+.photo-upload-zone{border:2px dashed var(--border);border-radius:14px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;color:var(--text-muted);font-size:.9rem}
+.photo-upload-zone:hover{border-color:var(--primary);color:var(--primary)}
+.photo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:1rem}
+.photo-thumb{aspect-ratio:1;border-radius:10px;object-fit:cover;width:100%}
+.template-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.search-result{padding:10px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.surprise-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.surprise-overlay.open{opacity:1;pointer-events:all}
+.surprise-box{background:var(--surface);border-radius:24px;padding:2rem;max-width:300px;width:90%;text-align:center;transform:scale(.8);transition:transform .3s}
+.surprise-overlay.open .surprise-box{transform:scale(1)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:6px 0 max(6px,env(safe-area-inset-bottom));z-index:100}
+.bottom-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:6px;color:var(--text-light);transition:color .2s;font-family:'DM Sans',sans-serif}
+.bottom-nav-btn .nav-icon{font-size:20px}
+.bottom-nav-btn .nav-label{font-size:10px;font-weight:500}
+.bottom-nav-btn.active{color:var(--primary)}
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:999}
+.confetto{position:absolute;width:8px;height:8px;border-radius:2px;animation:fall 2s ease-in forwards}
+@keyframes fall{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+@media(max-width:420px){.badges-grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-logo">CalorieCutie 🍓</span>
+  <div class="nav-right">
+    <button class="icon-btn" onclick="openModal('search-modal')" title="Search logs">🔍</button>
+    <button class="icon-btn" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+    <button class="icon-btn" onclick="openModal('cheat-modal')" title="Cheat day">🍕</button>
+  </div>
+</nav>
+
+<div class="milestone-pop" id="milestone-pop"></div>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="greeting-card">
+    <div class="greeting-name" id="greeting-text">Good morning! 🌸</div>
+    <div class="greeting-sub" id="greeting-sub">You're doing amazing today.</div>
+    <div class="greeting-note" id="partner-note-home" onclick="showPage('couple',null)">💌 Loading...</div>
+    <div id="countdown-wrap" style="margin-top:8px"></div>
+  </div>
+  <div id="cheat-banner" style="display:none" class="card"><div style="text-align:center;font-size:1.4rem">🎉 Cheat Day! Enjoy yourself today 🍕🍰</div></div>
+  <div class="card">
+    <div class="ring-wrap">
+      <svg width="100" height="100" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border)" stroke-width="10"/>
+        <circle id="ring-circle" cx="50" cy="50" r="40" fill="none" stroke="var(--primary)" stroke-width="10" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" transform="rotate(-90 50 50)" style="transition:stroke-dashoffset .8s"/>
+      </svg>
+      <div class="ring-stats">
+        <div class="ring-label">Calories today</div>
+        <div class="ring-value"><span id="cals-consumed">0</span> <span style="font-size:1rem;color:var(--text-muted)">/ <span id="cals-goal-display">2000</span></span></div>
+        <div class="ring-remaining" id="cals-remaining">2000 kcal remaining</div>
+        <div id="carryover-label" style="font-size:11px;color:var(--success);margin-top:3px"></div>
+      </div>
+    </div>
+    <div class="macro-row">
+      <div class="macro-chip"><div class="macro-chip-label">Protein</div><div class="macro-chip-val" id="macro-protein">0</div><div class="macro-chip-unit">g</div><div class="macro-bar"><div class="macro-bar-fill" id="bar-protein" style="width:0%;background:#e8617a"></div></div></div>
+      <div class="macro-chip"><div class="macro-chip-label">Carbs</div><div class="macro-chip-val" id="macro-carbs">0</div><div class="macro-chip-unit">g</div><div class="macro-bar"><div class="macro-bar-fill" id="bar-carbs" style="width:0%;background:#f0a84b"></div></div></div>
+      <div class="macro-chip"><div class="macro-chip-label">Fats</div><div class="macro-chip-val" id="macro-fats">0</div><div class="macro-chip-unit">g</div><div class="macro-bar"><div class="macro-bar-fill" id="bar-fats" style="width:0%;background:#4caf88"></div></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">💧 Water intake</div>
+    <div class="water-row" id="water-drops"></div>
+    <div style="font-size:13px;color:var(--text-muted);margin-top:8px" id="water-label">Tap drops to track • 0 / 8 glasses</div>
+  </div>
+  <div class="card">
+    <div class="card-title">💭 How are you feeling?</div>
+    <div class="mood-row">
+      <button class="mood-btn" onclick="logMood('😍','Amazing')" data-mood="Amazing"><span>😍</span><span>Amazing</span></button>
+      <button class="mood-btn" onclick="logMood('😊','Good')" data-mood="Good"><span>😊</span><span>Good</span></button>
+      <button class="mood-btn" onclick="logMood('😐','Okay')" data-mood="Okay"><span>😐</span><span>Okay</span></button>
+      <button class="mood-btn" onclick="logMood('😴','Tired')" data-mood="Tired"><span>😴</span><span>Tired</span></button>
+      <button class="mood-btn" onclick="logMood('😩','Rough')" data-mood="Rough"><span>😩</span><span>Rough</span></button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🌙 Sleep last night</div>
+    <div class="sleep-stars" id="sleep-stars"></div>
+    <div style="text-align:center;font-size:13px;color:var(--text-muted)" id="sleep-label">Tap to rate your sleep</div>
+  </div>
+  <div class="streak-banner">
+    <div><div class="streak-num" id="streak-num">0</div><div style="font-size:.78rem;opacity:.9">day streak 🔥</div></div>
+    <div><div style="font-size:.85rem;font-weight:500">Keep going, you're crushing it!</div></div>
+  </div>
+  <div class="affirmation-card">
+    <div class="affirmation-text" id="affirmation-text">"You are doing better than you think."</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-top:8px">Daily affirmation ✨</div>
+  </div>
+</div>
+
+<!-- LOG -->
+<div class="page" id="page-log">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+    <div class="section-head" style="margin:0">🍽 Today's meals</div>
+    <button class="icon-btn" onclick="openModal('template-modal')" title="Meal templates">📋</button>
+  </div>
+  <div id="meals-container"></div>
+  <div class="card" style="padding:1rem">
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">⭐ Quick add favorites</div>
+    <div id="quick-favs"></div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="page" id="page-progress">
+  <div class="section-head">📊 Your progress</div>
+  <div class="inner-tabs">
+    <button class="inner-tab active" onclick="switchPTab('week',this)">Week</button>
+    <button class="inner-tab" onclick="switchPTab('calendar',this)">Calendar</button>
+    <button class="inner-tab" onclick="switchPTab('weight',this)">Weight</button>
+    <button class="inner-tab" onclick="switchPTab('badges',this)">Badges</button>
+    <button class="inner-tab" onclick="switchPTab('mood',this)">Mood</button>
+    <button class="inner-tab" onclick="switchPTab('photos',this)">Photos</button>
+  </div>
+  <div id="ptab-week">
+    <div class="card"><div class="card-title">7-day overview</div><div class="week-chart" id="week-chart"></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-light);margin-top:4px" id="week-labels"></div></div>
+    <div class="card"><div class="card-title">Export</div><div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">Download this week's log as a file you can open in any browser and print as PDF</div><button class="btn-primary" onclick="exportPDF()">📄 Export weekly summary</button></div>
+  </div>
+  <div id="ptab-calendar" style="display:none">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <button class="icon-btn" onclick="calNav(-1)">◀</button>
+        <div style="font-family:'Fraunces',serif;font-weight:600" id="cal-month-label"></div>
+        <button class="icon-btn" onclick="calNav(1)">▶</button>
+      </div>
+      <div class="cal-header-days"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div style="display:flex;gap:12px;margin-top:12px;font-size:12px;color:var(--text-muted)">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--primary);margin-right:4px"></span>Goal hit</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--danger);margin-right:4px"></span>Over goal</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--surface2);margin-right:4px"></span>No log</span>
+      </div>
+    </div>
+  </div>
+  <div id="ptab-weight" style="display:none">
+    <div class="card"><div class="card-title">⚖️ Weight log</div><canvas id="weight-chart" height="140" style="width:100%"></canvas><div style="display:flex;gap:8px;margin-top:1rem"><input class="form-input" id="weight-input" type="number" step="0.1" placeholder="e.g. 65.5 kg" style="flex:1"><button class="btn-primary" style="width:auto;padding:10px 18px" onclick="logWeight()">Log</button></div><div id="weight-history" style="margin-top:1rem"></div></div>
+  </div>
+  <div id="ptab-badges" style="display:none"><div class="card"><div class="card-title">🏅 Badges</div><div class="badges-grid" id="badges-grid"></div></div></div>
+  <div id="ptab-mood" style="display:none"><div class="card"><div class="card-title">💭 Mood & sleep history</div><div id="mood-history"></div></div></div>
+  <div id="ptab-photos" style="display:none">
+    <div class="card"><div class="card-title">📸 Progress photos</div><div class="photo-upload-zone" onclick="document.getElementById('photo-input').click()">📷 Tap to add a progress photo<br><span style="font-size:12px">Stored privately on your device</span></div><input type="file" id="photo-input" accept="image/*" style="display:none" onchange="addPhoto(this)"><div class="photo-grid" id="photo-grid"></div></div>
+  </div>
+</div>
+
+<!-- COUPLE -->
+<div class="page" id="page-couple">
+  <div class="section-head">💕 Our space</div>
+  <div class="partner-note-card"><div class="note-from">💌 A note for you</div><div class="note-text" id="couple-note-display">Loading...</div><div style="font-size:1.2rem;margin-top:8px">❤️</div></div>
+  <div class="card">
+    <div class="card-title">✏️ Write a new note</div>
+    <textarea class="form-input" id="note-input" rows="3" placeholder="Write something sweet..."></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn-primary" onclick="saveNote()">Send note 💌</button>
+      <button class="btn-secondary" style="margin:0" onclick="openModal('surprise-modal')">🎁 Surprise</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🎉 React to her day</div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">Leave a reaction she'll see next time she opens the app</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button style="font-size:1.4rem;background:none;border:2px solid var(--border);border-radius:12px;padding:7px 11px;cursor:pointer;transition:border .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'" onclick="sendReaction('🥰')">🥰</button>
+      <button style="font-size:1.4rem;background:none;border:2px solid var(--border);border-radius:12px;padding:7px 11px;cursor:pointer;transition:border .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'" onclick="sendReaction('💪')">💪</button>
+      <button style="font-size:1.4rem;background:none;border:2px solid var(--border);border-radius:12px;padding:7px 11px;cursor:pointer;transition:border .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'" onclick="sendReaction('🌟')">🌟</button>
+      <button style="font-size:1.4rem;background:none;border:2px solid var(--border);border-radius:12px;padding:7px 11px;cursor:pointer;transition:border .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'" onclick="sendReaction('🎉')">🎉</button>
+      <button style="font-size:1.4rem;background:none;border:2px solid var(--border);border-radius:12px;padding:7px 11px;cursor:pointer;transition:border .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'" onclick="sendReaction('❤️')">❤️</button>
+    </div>
+    <div id="reaction-sent" style="font-size:13px;color:var(--primary);margin-top:10px"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 Special dates & countdowns</div>
+    <div id="special-dates-list"></div>
+    <button class="btn-secondary" style="width:100%;margin-top:10px" onclick="openModal('date-modal')">+ Add special date</button>
+  </div>
+  <div class="card">
+    <div class="card-title">🛒 Shared grocery list</div>
+    <div id="grocery-list"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input class="form-input" id="grocery-input" placeholder="Add item..." style="flex:1" onkeydown="if(event.key==='Enter')addGrocery()">
+      <button class="btn-primary" style="width:auto;padding:10px 18px" onclick="addGrocery()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="section-head">⚙️ Settings</div>
+  <div class="card">
+    <div class="card-title">Profile</div>
+    <div class="profile-avatar" id="profile-avatar" onclick="changeAvatar()">🌸</div>
+    <div class="form-group"><label class="form-label">Your name</label><input class="form-input" id="setting-name" placeholder="e.g. Sofia" oninput="saveSettings()"></div>
+    <div class="form-group"><label class="form-label">Daily calorie goal</label><input class="form-input" id="setting-goal" type="number" placeholder="2000" oninput="saveSettings()"></div>
+    <div class="form-group"><label class="form-label">Goal vibe</label>
+      <select class="form-input" id="setting-vibe" onchange="saveSettings()">
+        <option value="lose">🌿 Lose Weight</option><option value="maintain">⚖️ Maintain</option><option value="gain">💪 Build Muscle</option>
+      </select>
+    </div>
+    <div class="setting-row"><div><div class="setting-label">Budget carry-over</div><div class="setting-sub">Add yesterday's leftover calories to today's goal</div></div><button class="toggle" id="carryover-toggle" onclick="toggleCarryover()"></button></div>
+    <div class="setting-row"><div><div class="setting-label">Meal reminders</div><div class="setting-sub">Browser notifications at breakfast, lunch & dinner</div></div><button class="toggle" id="reminder-toggle" onclick="toggleReminders()"></button></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🎨 Theme color</div>
+    <div class="color-swatches" id="color-swatches"></div>
+    <div class="setting-row"><div><div class="setting-label">Dark mode</div><div class="setting-sub">Easy on the eyes at night</div></div><button class="toggle" id="dark-toggle" onclick="toggleTheme()"></button></div>
+  </div>
+  <div class="card">
+    <div class="card-title">✨ Custom affirmations</div>
+    <div id="affirmations-list" style="margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px"><input class="form-input" id="affirmation-input" placeholder="Add your own..." style="flex:1"><button class="btn-primary" style="width:auto;padding:10px 18px" onclick="addAffirmation()">Add</button></div>
+  </div>
+  <div class="card">
+    <div class="card-title">⭐ Favorite foods</div>
+    <div id="favorites-list"></div>
+    <button class="btn-secondary" style="width:100%;margin-top:10px" onclick="openModal('fav-modal')">+ Add favorite food</button>
+  </div>
+  <div class="card">
+    <div class="card-title">🍴 Custom meal names</div>
+    <div id="meal-name-settings"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 Meal templates</div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">Save a full day of meals as a template to reload any time</div>
+    <div id="templates-list"></div>
+    <button class="btn-secondary" style="width:100%;margin-top:10px" onclick="saveTemplate()">💾 Save today as template</button>
+  </div>
+  <div class="card">
+    <div class="card-title">📱 Install app</div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Add CalorieCutie to your home screen for a full app experience — works offline too!</div>
+    <button class="btn-primary" onclick="installPWA()">📲 Add to Home Screen</button>
+    <div style="font-size:12px;color:var(--text-muted);margin-top:8px">Or: browser menu → Share → Add to Home Screen</div>
+  </div>
+  <div class="card">
+    <div class="card-title">🔄 Data</div>
+    <button class="btn-secondary" style="width:100%" onclick="exportData()">📤 Export backup</button>
+    <button class="btn-secondary" style="width:100%;margin-top:8px;color:var(--danger);border-color:var(--danger)" onclick="if(confirm('Reset ALL data? This cannot be undone.'))resetData()">🗑 Reset all data</button>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button class="bottom-nav-btn active" onclick="showPage('home',this)"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+  <button class="bottom-nav-btn" onclick="showPage('log',this)"><span class="nav-icon">🍽</span><span class="nav-label">Log</span></button>
+  <button class="bottom-nav-btn" onclick="showPage('progress',this)"><span class="nav-icon">📊</span><span class="nav-label">Progress</span></button>
+  <button class="bottom-nav-btn" onclick="showPage('couple',this)"><span class="nav-icon">💕</span><span class="nav-label">Us</span></button>
+  <button class="bottom-nav-btn" onclick="showPage('settings',this)"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></button>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg" id="food-modal"><div class="modal">
+  <div class="modal-handle"></div><div class="modal-title">Add food</div>
+  <div class="form-group"><label class="form-label">Meal</label><select class="form-input" id="food-meal-select"></select></div>
+  <div class="form-group"><label class="form-label">Food name</label><input class="form-input" id="food-name-input" placeholder="e.g. Greek Yogurt"></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Calories (kcal)</label><input class="form-input" id="food-cals-input" type="number" placeholder="150"></div>
+    <div class="form-group"><label class="form-label">Serving size</label><input class="form-input" id="food-serving-input" placeholder="e.g. 200g"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Protein (g)</label><input class="form-input" id="food-protein-input" type="number" placeholder="0"></div>
+    <div class="form-group"><label class="form-label">Carbs (g)</label><input class="form-input" id="food-carbs-input" type="number" placeholder="0"></div>
+    <div class="form-group"><label class="form-label">Fats (g)</label><input class="form-input" id="food-fats-input" type="number" placeholder="0"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Serving multiplier (×<span id="mult-val">1</span>)</label><input type="range" min="0.25" max="4" step="0.25" value="1" id="serving-mult" oninput="document.getElementById('mult-val').textContent=this.value" style="width:100%"></div>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:1rem"><input type="checkbox" id="food-fav-check" style="width:16px;height:16px"><label for="food-fav-check" style="font-size:13px;color:var(--text-muted)">⭐ Save as favorite</label></div>
+  <button class="btn-primary" onclick="addFood()">Add food</button>
+  <button class="btn-secondary" onclick="closeModal('food-modal')" style="width:100%">Cancel</button>
+</div></div>
+
+<div class="modal-bg" id="fav-modal"><div class="modal">
+  <div class="modal-handle"></div><div class="modal-title">Add favorite food</div>
+  <div class="form-group"><label class="form-label">Food name</label><input class="form-input" id="fav-name-input" placeholder="e.g. Avocado Toast"></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Calories</label><input class="form-input" id="fav-cals-input" type="number" placeholder="300"></div>
+    <div class="form-group"><label class="form-label">Serving</label><input class="form-input" id="fav-serving-input" placeholder="1 slice"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Protein</label><input class="form-input" id="fav-protein-input" type="number" placeholder="0"></div>
+    <div class="form-group"><label class="form-label">Carbs</label><input class="form-input" id="fav-carbs-input" type="number" placeholder="0"></div>
+    <div class="form-group"><label class="form-label">Fats</label><input class="form-input" id="fav-fats-input" type="number" placeholder="0"></div>
+  </div>
+  <button class="btn-primary" onclick="saveFavorite()">Save favorite</button>
+  <button class="btn-secondary" onclick="closeModal('fav-modal')" style="width:100%">Cancel</button>
+</div></div>
+
+<div class="modal-bg" id="template-modal"><div class="modal">
+  <div class="modal-handle"></div><div class="modal-title">📋 Meal templates</div>
+  <div style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">Load a full saved day's meals at once</div>
+  <div id="template-modal-list"></div>
+  <button class="btn-secondary" onclick="closeModal('template-modal')" style="width:100%">Close</button>
+</div></div>
+
+<div class="modal-bg" id="cheat-modal"><div class="modal">
+  <div class="modal-handle"></div><div class="modal-title">🍕 Cheat Day!</div>
+  <div style="text-align:center;font-size:3rem;margin:1rem 0">🎉🍔🍕🍰🎂</div>
+  <div class="form-group"><label class="form-label">Custom calorie cap (optional — leave blank to pause tracking)</label><input class="form-input" id="cheat-cap-input" type="number" placeholder="e.g. 2500"></div>
+  <button class="btn-primary" onclick="activateCheatDay()">Activate cheat day! 🎉</button>
+  <button class="btn-secondary" onclick="closeModal('cheat-modal')" style="width:100%">Maybe not today</button>
+</div></div>
+
+<div class="modal-bg" id="search-modal"><div class="modal">
+  <div class="modal-handle"></div><div class="modal-title">🔍 Search past logs</div>
+  <input class="form-input" id="search-input" placeholder="Search food name..." oninput="searchLogs(this.value)" style="margin-bottom:1rem">
+  <div id="search-results"></div>
+  <button class="btn-secondary" onclick="closeModal('search-modal')" style="width:100%">Close</button>
+</div></div>
+
+<div class="modal-bg" id="date-modal"><div class="modal">
+  <div class="modal-handle"></div><div class="modal-title">📅 Add special date</div>
+  <div class="form-group"><label class="form-label">Label</label><input class="form-input" id="date-label-input" placeholder="e.g. Our anniversary 💍"></div>
+  <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="date-input" type="date"></div>
+  <button class="btn-primary" onclick="addSpecialDate()">Add date</button>
+  <button class="btn-secondary" onclick="closeModal('date-modal')" style="width:100%">Cancel</button>
+</div></div>
+
+<div class="modal-bg" id="surprise-modal"><div class="modal">
+  <div class="modal-handle"></div><div class="modal-title">🎁 Add a surprise unlock</div>
+  <div style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">A secret message that appears when she hits a milestone</div>
+  <div class="form-group"><label class="form-label">Unlock when</label>
+    <select class="form-input" id="surprise-trigger">
+      <option value="streak_7">🔥 7-day streak</option>
+      <option value="streak_30">🏆 30-day streak</option>
+      <option value="weight_log">⚖️ Logs her first weight</option>
+      <option value="photo">📸 Adds first progress photo</option>
+    </select>
+  </div>
+  <div class="form-group"><label class="form-label">Your message</label><textarea class="form-input" id="surprise-text" rows="4" placeholder="Write something special just for her..."></textarea></div>
+  <button class="btn-primary" onclick="saveSurprise()">Save surprise 🎁</button>
+  <button class="btn-secondary" onclick="closeModal('surprise-modal')" style="width:100%">Cancel</button>
+</div></div>
+
+<div class="modal-bg" id="meal-mood-modal"><div class="modal">
+  <div class="modal-handle"></div><div class="modal-title">How did you feel after eating?</div>
+  <div class="mood-row">
+    <button class="mood-btn" onclick="saveMealMood('😋')"><span>😋</span><span>Great</span></button>
+    <button class="mood-btn" onclick="saveMealMood('😊')"><span>😊</span><span>Good</span></button>
+    <button class="mood-btn" onclick="saveMealMood('😐')"><span>😐</span><span>Okay</span></button>
+    <button class="mood-btn" onclick="saveMealMood('😞')"><span>😞</span><span>Heavy</span></button>
+    <button class="mood-btn" onclick="saveMealMood('🤢')"><span>🤢</span><span>Unwell</span></button>
+  </div>
+  <button class="btn-secondary" onclick="closeModal('meal-mood-modal')" style="width:100%">Skip</button>
+</div></div>
+
+<div class="surprise-overlay" id="surprise-overlay">
+  <div class="surprise-box">
+    <div style="font-size:3rem;margin-bottom:1rem">🎁</div>
+    <div style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600;color:var(--text);margin-bottom:1rem">A surprise for you!</div>
+    <div style="font-size:.95rem;color:var(--text-muted);font-style:italic;line-height:1.6;margin-bottom:1.5rem" id="surprise-reveal-text"></div>
+    <button class="btn-primary" onclick="document.getElementById('surprise-overlay').classList.remove('open')">💕 Thank you!</button>
+  </div>
+</div>
+
+<div class="confetti-wrap" id="confetti-wrap" style="display:none"></div>
+
+<script>
+const THEMES=[
+  {n:'Rose',p:'#e8617a',d:'#c44460',l:'#fdeef1'},
+  {n:'Violet',p:'#8b5cf6',d:'#6d28d9',l:'#ede9fe'},
+  {n:'Sky',p:'#0ea5e9',d:'#0369a1',l:'#e0f2fe'},
+  {n:'Mint',p:'#10b981',d:'#059669',l:'#d1fae5'},
+  {n:'Peach',p:'#f97316',d:'#c2410c',l:'#fff7ed'},
+  {n:'Plum',p:'#a855f7',d:'#7e22ce',l:'#faf5ff'},
+];
+const AFFS=['"You are doing better than you think."','"Every small step counts. You\'ve got this!"','"Progress, not perfection."','"Your health journey is uniquely yours."','"You are worthy of feeling amazing in your body."'];
+const BADGES=[
+  {emoji:'🌟',name:'First Log',id:'first_log'},{emoji:'🔥',name:'3-Day Streak',id:'streak_3'},
+  {emoji:'⚡',name:'7-Day Streak',id:'streak_7'},{emoji:'🏆',name:'30-Day Streak',id:'streak_30'},
+  {emoji:'💧',name:'Hydrated',id:'hydrated'},{emoji:'🎯',name:'Goal Hit',id:'goal_hit'},
+  {emoji:'⭐',name:'Fav Fan',id:'fav_3'},{emoji:'📸',name:'Progress Pic',id:'photo'},
+  {emoji:'💕',name:'Couple Goals',id:'couple_note'},{emoji:'⚖️',name:'Weight Logged',id:'weight_log'},
+  {emoji:'😴',name:'Rest Queen',id:'sleep_log'},{emoji:'🌈',name:'Full Week',id:'full_week'},
+];
+const AVATARS=['🌸','🌺','🦋','🌙','⭐','🌈','🍓','🌻','💫','🦄','🐱','🌷'];
+let avatarIdx=0;
+let calViewDate=new Date();
+let currentMealTarget=null;
+let deferredInstall=null;
+window.addEventListener('beforeinstallprompt',e=>{deferredInstall=e;});
+
+let S={
+  name:'',goal:2000,vibe:'lose',theme:0,darkMode:false,avatar:'🌸',
+  mealNames:['Breakfast','Lunch','Dinner','Snacks'],
+  meals:{Breakfast:[],Lunch:[],Dinner:[],Snacks:[]},
+  water:0,lastWaterDate:'',streak:0,lastLogDate:'',
+  partnerNote:'"Hello beautiful! You are crushing it today 💪 So proud of you!"',
+  pendingReaction:'',groceries:[],favorites:[],affirmations:[],badges:[],
+  moodLog:[],sleepLog:[],photos:[],weightLog:[],
+  cheatDay:false,cheatDayDate:'',cheatCap:null,
+  templates:[],specialDates:[],surprises:[],shownSurprises:[],
+  carryover:false,reminders:false,
+};
+
+function load(){const d=localStorage.getItem('cc_v3');if(d)try{S={...S,...JSON.parse(d)};}catch(e){}}
+function save(){localStorage.setItem('cc_v3',JSON.stringify(S));}
+function today(){return new Date().toISOString().slice(0,10);}
+
+function init(){
+  load();setupManifest();applyTheme();applyDark();
+  renderGreeting();renderHome();renderLog();renderCouple();renderSettings();
+  checkStreak();checkPendingReaction();checkSurprises();setupReminders();
+  document.querySelectorAll('.modal-bg').forEach(b=>b.addEventListener('click',e=>{if(e.target===b)b.classList.remove('open');}));
+}
+
+function setupManifest(){
+  const m={name:'CalorieCutie',short_name:'CalorieCutie',start_url:'.',display:'standalone',background_color:'#fff6f8',theme_color:'#e8617a',icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🍓</text></svg>',sizes:'192x192',type:'image/svg+xml'}]};
+  const b=new Blob([JSON.stringify(m)],{type:'application/json'});
+  document.getElementById('pwa-manifest').href=URL.createObjectURL(b);
+}
+function applyTheme(){const t=THEMES[S.theme]||THEMES[0];const r=document.documentElement.style;r.setProperty('--primary',t.p);r.setProperty('--primary-dark',t.d);r.setProperty('--primary-light',t.l);}
+function applyDark(){document.body.setAttribute('data-theme',S.darkMode?'dark':'');const b=document.getElementById('dark-toggle');if(b)b.className='toggle'+(S.darkMode?' on':'');}
+function toggleTheme(){S.darkMode=!S.darkMode;applyDark();save();}
+
+function showPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(name==='progress')renderWeekChart();
+  if(name==='couple')renderCouple();
+}
+function openModal(id,meal){
+  if(id==='food-modal'){
+    const sel=document.getElementById('food-meal-select');sel.innerHTML='';
+    S.mealNames.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);});
+    if(meal)sel.value=meal;
+    document.getElementById('serving-mult').value=1;document.getElementById('mult-val').textContent=1;
+  }
+  if(id==='template-modal')renderTemplateModal();
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+function renderGreeting(){
+  const h=new Date().getHours();
+  const g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+  document.getElementById('greeting-text').textContent=`${g}, ${S.name||'Beautiful'}! 🌸`;
+  const vm={lose:'Keep going, every meal counts! 🥗',maintain:'Balance is key. You\'ve got this! ⚖️',gain:'Fuel your goals today! 💪'};
+  document.getElementById('greeting-sub').textContent=vm[S.vibe]||'You\'re doing amazing today.';
+  const n=document.getElementById('partner-note-home');
+  if(n)n.textContent='💌 '+(S.partnerNote||'').replace(/"/g,'');
+  const cw=document.getElementById('countdown-wrap');cw.innerHTML='';
+  const now=new Date();now.setHours(0,0,0,0);
+  (S.specialDates||[]).forEach(sd=>{
+    const d=new Date(sd.date);d.setHours(0,0,0,0);
+    const diff=Math.round((d-now)/(864e5));
+    if(diff>=0&&diff<=90){
+      const c=document.createElement('div');c.className='countdown-chip';
+      c.textContent=(diff===0?'🎉 Today! ':'📅 '+diff+'d away — ')+sd.label;
+      cw.appendChild(c);
+    }
+  });
+}
+
+function renderHome(){
+  const td=today();let total=0,prot=0,carb=0,fat=0;
+  S.mealNames.forEach(m=>(S.meals[m]||[]).forEach(f=>{if((f.date||td)===td){total+=f.cals||0;prot+=f.protein||0;carb+=f.carbs||0;fat+=f.fats||0;}}));
+  let effGoal=S.goal||2000;let carryText='';
+  if(S.carryover){
+    const yd=new Date();yd.setDate(yd.getDate()-1);const yds=yd.toISOString().slice(0,10);
+    let yt=0;S.mealNames.forEach(m=>(S.meals[m]||[]).forEach(f=>{if((f.date||td)===yds)yt+=f.cals||0;}));
+    const lo=effGoal-yt;if(lo>0){effGoal+=lo;carryText=`+${lo} kcal carried from yesterday`;}
+  }
+  const isCheat=S.cheatDay&&S.cheatDayDate===td;
+  if(isCheat&&S.cheatCap)effGoal=S.cheatCap;
+  document.getElementById('cals-consumed').textContent=total;
+  document.getElementById('cals-goal-display').textContent=effGoal;
+  const rem=effGoal-total;
+  document.getElementById('cals-remaining').textContent=rem>=0?`${rem} kcal remaining`:`${Math.abs(rem)} kcal over goal`;
+  document.getElementById('carryover-label').textContent=carryText;
+  const pct=Math.min(total/effGoal,1);const circ=2*Math.PI*40;
+  document.getElementById('ring-circle').style.strokeDashoffset=circ-(pct*circ);
+  document.getElementById('ring-circle').style.stroke=total>effGoal?'var(--danger)':'var(--primary)';
+  document.getElementById('macro-protein').textContent=prot;
+  document.getElementById('macro-carbs').textContent=carb;
+  document.getElementById('macro-fats').textContent=fat;
+  document.getElementById('bar-protein').style.width=Math.min(prot/2,100)+'%';
+  document.getElementById('bar-carbs').style.width=Math.min(carb/3,100)+'%';
+  document.getElementById('bar-fats').style.width=Math.min(fat/1,100)+'%';
+  const pctI=Math.floor(pct*100);
+  if([25,50,75].includes(pctI)&&!sessionStorage.getItem('ms'+pctI+td)){
+    sessionStorage.setItem('ms'+pctI+td,'1');
+    const msgs={25:'25% done! Great start 🌱',50:'Halfway there! 🌟',75:'75%! Almost there 💪'};
+    showMilestone(msgs[pctI]);
+  }
+  document.getElementById('cheat-banner').style.display=isCheat&&!S.cheatCap?'':'none';
+  renderWater();renderSleepStars();
+  const affs=[...AFFS,...(S.affirmations||[])];
+  document.getElementById('affirmation-text').textContent=affs[new Date().getDate()%affs.length];
+  document.getElementById('streak-num').textContent=S.streak||0;
+}
+
+function showMilestone(msg){const p=document.getElementById('milestone-pop');p.textContent=msg;p.classList.add('show');setTimeout(()=>p.classList.remove('show'),3000);}
+function renderWater(){
+  const w=document.getElementById('water-drops');w.innerHTML='';
+  for(let i=0;i<8;i++){const d=document.createElement('div');d.className='water-drop';d.textContent=i<S.water?'💧':'🩵';d.onclick=()=>{S.water=(S.water===i+1)?i:i+1;save();renderWater();checkBadge();};w.appendChild(d);}
+  document.getElementById('water-label').textContent=`Tap drops to track • ${S.water} / 8 glasses`;
+}
+function renderSleepStars(){
+  const w=document.getElementById('sleep-stars');if(!w)return;
+  const td=today();const ts=(S.sleepLog||[]).find(s=>s.date===td);const r=ts?ts.rating:0;
+  w.innerHTML='';
+  for(let i=1;i<=5;i++){const s=document.createElement('div');s.className='sleep-star'+(i<=r?' active':'');s.textContent=['😴','😪','😐','😊','🌟'][i-1];(i=>{s.onclick=()=>logSleep(i);})(i);w.appendChild(s);}
+  document.getElementById('sleep-label').textContent=r?['Terrible 😴','Poor 😪','Okay 😐','Good 😊','Amazing 🌟'][r-1]:'Tap to rate your sleep';
+}
+function logSleep(r){const td=today();S.sleepLog=(S.sleepLog||[]).filter(s=>s.date!==td);S.sleepLog.push({date:td,rating:r});save();renderSleepStars();awardBadge('sleep_log');showToast(['Terrible sleep 😴','Poor sleep 😪','Okay sleep 😐','Good sleep 😊','Amazing sleep 🌟'][r-1]);}
+
+function renderLog(){
+  const c=document.getElementById('meals-container');c.innerHTML='';
+  const td=today();
+  const sel=document.getElementById('food-meal-select');if(sel){sel.innerHTML='';S.mealNames.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);});}
+  S.mealNames.forEach(mName=>{
+    const items=(S.meals[mName]||[]).filter(f=>(f.date||td)===td);
+    const tc=items.reduce((s,f)=>s+(f.cals||0),0);
+    const sec=document.createElement('div');sec.className='card';
+    let h=`<div class="meal-section-header"><div class="meal-section-name">${mName}</div><div class="meal-section-cals">${tc} kcal</div></div>`;
+    if(!items.length)h+=`<div style="font-size:13px;color:var(--text-light);padding:6px 0">Nothing logged yet</div>`;
+    items.forEach((f,i)=>{h+=`<div class="meal-item"><div><div class="meal-item-name">${f.name}${f.mealMood?' '+f.mealMood:''}</div><div class="meal-item-detail">${f.serving||''}${f.time?' · '+f.time:''}</div></div><div style="display:flex;align-items:center;gap:6px"><div class="meal-item-cals">${f.cals} kcal</div><button style="background:none;border:none;cursor:pointer;font-size:14px" onclick="pickMealMood('${mName}',${i})" title="How did you feel?">😶</button><button class="meal-item-del" onclick="delFood('${mName}',${i})">✕</button></div></div>`;});
+    h+=`<button class="add-food-btn" onclick="openModal('food-modal','${mName}')">+ Add food to ${mName}</button>`;
+    sec.innerHTML=h;c.appendChild(sec);
+  });
+  const qf=document.getElementById('quick-favs');
+  if(!(S.favorites||[]).length){qf.innerHTML='<div style="font-size:13px;color:var(--text-light)">Add favorites in Settings to quick-add them here!</div>';return;}
+  qf.innerHTML=S.favorites.slice(0,6).map((f,i)=>`<div class="fav-item"><div><div class="fav-name">${f.name}</div><div class="fav-detail">${f.serving||''} · ${f.cals} kcal</div></div><button class="quick-add-btn" onclick="qAddFav(${i})">+ Add</button></div>`).join('');
+}
+
+function addFood(){
+  const meal=document.getElementById('food-meal-select').value;
+  const name=document.getElementById('food-name-input').value.trim();
+  const rawC=parseInt(document.getElementById('food-cals-input').value)||0;
+  const mult=parseFloat(document.getElementById('serving-mult').value)||1;
+  if(!name||!rawC)return;
+  const cals=Math.round(rawC*mult);
+  const serving=document.getElementById('food-serving-input').value.trim();
+  const protein=Math.round((parseInt(document.getElementById('food-protein-input').value)||0)*mult);
+  const carbs=Math.round((parseInt(document.getElementById('food-carbs-input').value)||0)*mult);
+  const fats=Math.round((parseInt(document.getElementById('food-fats-input').value)||0)*mult);
+  const isFav=document.getElementById('food-fav-check').checked;
+  if(!S.meals[meal])S.meals[meal]=[];
+  const now=new Date();const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  S.meals[meal].push({name,cals,serving:mult!==1?`${mult}× ${serving}`:serving,protein,carbs,fats,date:today(),time});
+  if(isFav&&!S.favorites.find(f=>f.name===name))S.favorites.push({name,cals:rawC,serving,protein:Math.round(protein/mult),carbs:Math.round(carbs/mult),fats:Math.round(fats/mult)});
+  save();closeModal('food-modal');
+  ['food-name-input','food-cals-input','food-serving-input','food-protein-input','food-carbs-input','food-fats-input'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('food-fav-check').checked=false;
+  currentMealTarget={meal,idx:(S.meals[meal].length-1)};
+  renderLog();renderHome();checkBadge();checkStreak();
+  setTimeout(()=>openModal('meal-mood-modal'),500);
+}
+function pickMealMood(meal,idx){currentMealTarget={meal,idx};openModal('meal-mood-modal');}
+function saveMealMood(emoji){
+  if(currentMealTarget){
+    const {meal,idx}=currentMealTarget;const td=today();
+    const items=S.meals[meal].filter(f=>(f.date||td)===td);
+    if(items[idx])items[idx].mealMood=emoji;save();
+  }
+  closeModal('meal-mood-modal');renderLog();
+}
+function delFood(meal,idx){
+  const td=today();const items=S.meals[meal].filter(f=>(f.date||td)===td);
+  const item=items[idx];const gi=S.meals[meal].indexOf(item);
+  S.meals[meal].splice(gi,1);save();renderLog();renderHome();
+}
+function qAddFav(i){
+  const f=S.favorites[i];const meal=S.mealNames[0];
+  if(!S.meals[meal])S.meals[meal]=[];
+  const now=new Date();const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  S.meals[meal].push({...f,date:today(),time});save();renderLog();renderHome();checkBadge();checkStreak();showToast('Added '+f.name+' ✅');
+}
+
+function saveTemplate(){
+  const td=today();const name=prompt('Name this template:','My usual day');if(!name)return;
+  const items=[];S.mealNames.forEach(m=>(S.meals[m]||[]).filter(f=>(f.date||td)===td).forEach(f=>items.push({...f,meal:m})));
+  if(!items.length){showToast('No food logged today!');return;}
+  S.templates=(S.templates||[]);S.templates.push({name,items,created:td});save();renderSettings();showToast('Template saved: '+name+' 📋');
+}
+function loadTemplate(i){
+  const t=S.templates[i];if(!t)return;const td=today();
+  t.items.forEach(f=>{const m=f.meal||S.mealNames[0];if(!S.meals[m])S.meals[m]=[];S.meals[m].push({...f,date:td});});
+  save();closeModal('template-modal');renderLog();renderHome();showToast('Loaded: '+t.name+' ✅');
+}
+function renderTemplateModal(){
+  const l=document.getElementById('template-modal-list');
+  if(!(S.templates||[]).length){l.innerHTML='<div style="font-size:13px;color:var(--text-light);margin-bottom:1rem">No templates yet. Save today\'s meals from Settings!</div>';return;}
+  l.innerHTML=S.templates.map((t,i)=>`<div class="template-item"><div><div style="font-weight:600;font-size:.9rem;color:var(--text)">${t.name}</div><div style="font-size:.78rem;color:var(--text-muted)">${t.items.length} foods · saved ${t.created}</div></div><button class="quick-add-btn" onclick="loadTemplate(${i})">Load</button></div>`).join('');
+}
+
+function switchPTab(name,btn){
+  document.querySelectorAll('[id^="ptab-"]').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.inner-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('ptab-'+name).style.display='';btn.classList.add('active');
+  if(name==='week')renderWeekChart();
+  if(name==='calendar')renderCalendar();
+  if(name==='weight')renderWeightChart();
+  if(name==='badges')renderBadges();
+  if(name==='mood')renderMoodHistory();
+  if(name==='photos')renderPhotos();
+}
+function renderWeekChart(){
+  const ch=document.getElementById('week-chart');const lb=document.getElementById('week-labels');if(!ch)return;
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const td=today();const now=new Date();
+  let cH='',lH='';
+  for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);const ds=d.toISOString().slice(0,10);
+    let total=0;S.mealNames.forEach(m=>(S.meals[m]||[]).forEach(f=>{if((f.date||td)===ds)total+=f.cals||0;}));
+    const pct=S.goal?Math.min(total/S.goal,1):0;const over=total>S.goal&&total>0;
+    cH+=`<div class="week-bar-wrap"><div class="week-bar-outer"><div class="week-bar-inner${over?' over':''}" style="height:${Math.max(pct*100,4)}%"></div></div></div>`;
+    lH+=`<span>${days[d.getDay()]}</span>`;
+  }
+  ch.innerHTML=cH;lb.innerHTML=lH;
+}
+function renderCalendar(){
+  const y=calViewDate.getFullYear(),mo=calViewDate.getMonth();
+  document.getElementById('cal-month-label').textContent=calViewDate.toLocaleString('default',{month:'long',year:'numeric'});
+  const g=document.getElementById('cal-grid');g.innerHTML='';
+  const td=today();const first=new Date(y,mo,1).getDay();const dim=new Date(y,mo+1,0).getDate();
+  for(let i=0;i<first;i++){const d=document.createElement('div');d.className='cal-day';g.appendChild(d);}
+  for(let d=1;d<=dim;d++){
+    const ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let total=0;S.mealNames.forEach(m=>(S.meals[m]||[]).forEach(f=>{if((f.date||td)===ds)total+=f.cals||0;}));
+    const div=document.createElement('div');
+    let cls='cal-day';
+    if(ds>td)cls+=' future';
+    else if(total===0)cls+=' empty';
+    else if(total<=S.goal)cls+=' hit';
+    else cls+=' over';
+    if(ds===td)cls+=' today';
+    div.className=cls;div.textContent=d;g.appendChild(div);
+  }
+}
+function calNav(dir){calViewDate=new Date(calViewDate.getFullYear(),calViewDate.getMonth()+dir,1);renderCalendar();}
+
+function renderWeightChart(){
+  const canvas=document.getElementById('weight-chart');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const logs=(S.weightLog||[]).slice(-14);
+  const wh=document.getElementById('weight-history');
+  if(!logs.length){ctx.clearRect(0,0,canvas.width,canvas.height);wh.innerHTML='<div style="font-size:13px;color:var(--text-light)">No weight logs yet</div>';return;}
+  const W=canvas.offsetWidth||320,H=140;canvas.width=W;canvas.height=H;
+  const vals=logs.map(l=>l.weight);const mn=Math.min(...vals)-1,mx=Math.max(...vals)+1;
+  const xS=logs.length>1?W/(logs.length-1):W;const yS=(H-20)/(mx-mn||1);
+  ctx.clearRect(0,0,W,H);
+  const color=getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+  ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.lineJoin='round';
+  logs.forEach((l,i)=>{const x=i*xS,y=H-10-(l.weight-mn)*yS;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+  logs.forEach((l,i)=>{const x=i*xS,y=H-10-(l.weight-mn)*yS;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();});
+  wh.innerHTML=logs.slice(-5).reverse().map(l=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem"><span style="color:var(--text)">${l.weight} kg</span><span style="color:var(--text-muted)">${l.date}</span></div>`).join('');
+}
+function logWeight(){const v=parseFloat(document.getElementById('weight-input').value);if(!v)return;S.weightLog=(S.weightLog||[]);S.weightLog.push({weight:v,date:today()});document.getElementById('weight-input').value='';save();renderWeightChart();awardBadge('weight_log');checkSurprises();showToast('Weight logged ⚖️');}
+
+function renderBadges(){const b=document.getElementById('badges-grid');if(!b)return;b.innerHTML=BADGES.map(x=>{const e=(S.badges||[]).includes(x.id);return`<div class="badge-item${e?' earned':' locked'}" title="${x.id}"><span class="badge-emoji">${x.emoji}</span><div class="badge-name">${x.name}</div></div>`;}).join('');}
+function renderMoodHistory(){
+  const mh=document.getElementById('mood-history');if(!mh)return;
+  const ml=(S.moodLog||[]).slice(-14).reverse();
+  const sm={};(S.sleepLog||[]).forEach(s=>sm[s.date]=s.rating);
+  if(!ml.length){mh.innerHTML='<div style="font-size:13px;color:var(--text-light)">No moods logged yet.</div>';return;}
+  mh.innerHTML=ml.map(m=>{const sl=sm[m.date];return`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:1.2rem">${m.emoji}</span><div><div style="font-size:.85rem;color:var(--text)">${m.mood}</div><div style="font-size:.75rem;color:var(--text-light)">${m.date}${sl?' · Sleep '+['😴','😪','😐','😊','🌟'][sl-1]:''}</div></div></div>`;}).join('');
+}
+function renderPhotos(){const pg=document.getElementById('photo-grid');if(!pg)return;pg.innerHTML=S.photos.length?S.photos.map(p=>`<img src="${p}" class="photo-thumb" alt="Progress photo">`).join(''):'';}
+function addPhoto(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{S.photos.push(e.target.result);save();renderPhotos();awardBadge('photo');checkSurprises();};r.readAsDataURL(f);}
+
+function renderCouple(){
+  document.getElementById('couple-note-display').textContent=S.partnerNote||'No note yet.';
+  const rr=document.getElementById('reaction-sent');
+  if(rr)rr.textContent=S.pendingReaction?`Reaction sent: ${S.pendingReaction} — she'll see it next time!`:'';
+  renderSpecialDates();renderGroceries();
+}
+function saveNote(){const t=document.getElementById('note-input').value.trim();if(!t)return;S.partnerNote='"'+t+'"';save();renderCouple();renderGreeting();awardBadge('couple_note');showToast('Note saved 💌');}
+function sendReaction(e){S.pendingReaction=e;save();document.getElementById('reaction-sent').textContent=`Reaction sent: ${e} — she'll see it next time!`;showToast('Reaction sent '+e);}
+function checkPendingReaction(){if(S.pendingReaction){setTimeout(()=>{showToast(S.pendingReaction+' Your partner sent a reaction!');},1500);}}
+
+function renderSpecialDates(){
+  const l=document.getElementById('special-dates-list');if(!l)return;
+  if(!(S.specialDates||[]).length){l.innerHTML='<div style="font-size:13px;color:var(--text-light)">No special dates added yet.</div>';return;}
+  const now=new Date();now.setHours(0,0,0,0);
+  l.innerHTML=S.specialDates.map((sd,i)=>{
+    const d=new Date(sd.date);d.setHours(0,0,0,0);const diff=Math.round((d-now)/864e5);
+    const ds=diff===0?'Today! 🎉':diff>0?diff+' days away':Math.abs(diff)+' days ago';
+    return`<div class="fav-item"><div><div class="fav-name">${sd.label}</div><div class="fav-detail">${sd.date} · ${ds}</div></div><button style="background:none;border:none;cursor:pointer;color:var(--text-light)" onclick="delDate(${i})">✕</button></div>`;
+  }).join('');
+}
+function addSpecialDate(){const l=document.getElementById('date-label-input').value.trim();const d=document.getElementById('date-input').value;if(!l||!d)return;S.specialDates=(S.specialDates||[]);S.specialDates.push({label:l,date:d});save();closeModal('date-modal');renderCouple();renderGreeting();document.getElementById('date-label-input').value='';document.getElementById('date-input').value='';}
+function delDate(i){S.specialDates.splice(i,1);save();renderCouple();}
+function renderGroceries(){
+  const g=document.getElementById('grocery-list');if(!g)return;
+  if(!(S.groceries||[]).length){g.innerHTML='<div style="font-size:13px;color:var(--text-light);padding:10px 0">No items yet!</div>';return;}
+  g.innerHTML=S.groceries.map((x,i)=>`<div class="grocery-item"><div class="grocery-check${x.done?' checked':''}" onclick="togGroc(${i})">${x.done?'✓':''}</div><div class="grocery-text${x.done?' done':''}">${x.text}</div><button style="background:none;border:none;cursor:pointer;color:var(--text-light);font-size:14px" onclick="delGroc(${i})">✕</button></div>`).join('');
+}
+function addGrocery(){const inp=document.getElementById('grocery-input');const t=inp.value.trim();if(!t)return;S.groceries=(S.groceries||[]);S.groceries.push({text:t,done:false});inp.value='';save();renderGroceries();}
+function togGroc(i){S.groceries[i].done=!S.groceries[i].done;save();renderGroceries();}
+function delGroc(i){S.groceries.splice(i,1);save();renderGroceries();}
+
+function saveSurprise(){
+  const trigger=document.getElementById('surprise-trigger').value;
+  const text=document.getElementById('surprise-text').value.trim();if(!text)return;
+  S.surprises=(S.surprises||[]);S.surprises.push({trigger,text});save();closeModal('surprise-modal');showToast('Surprise saved 🎁');document.getElementById('surprise-text').value='';
+}
+function checkSurprises(){
+  (S.surprises||[]).forEach((s,i)=>{
+    if((S.shownSurprises||[]).includes(i))return;
+    let show=false;
+    if(s.trigger==='streak_7'&&S.streak>=7)show=true;
+    if(s.trigger==='streak_30'&&S.streak>=30)show=true;
+    if(s.trigger==='weight_log'&&(S.weightLog||[]).length>=1)show=true;
+    if(s.trigger==='photo'&&S.photos.length>=1)show=true;
+    if(show){S.shownSurprises=(S.shownSurprises||[]);S.shownSurprises.push(i);save();setTimeout(()=>{document.getElementById('surprise-reveal-text').textContent=s.text;document.getElementById('surprise-overlay').classList.add('open');confetti();},800);}
+  });
+}
+
+function renderSettings(){
+  document.getElementById('setting-name').value=S.name||'';
+  document.getElementById('setting-goal').value=S.goal||2000;
+  document.getElementById('setting-vibe').value=S.vibe||'lose';
+  document.getElementById('profile-avatar').textContent=S.avatar||'🌸';
+  document.getElementById('color-swatches').innerHTML=THEMES.map((t,i)=>`<div class="swatch${S.theme===i?' selected':''}" style="background:${t.p}" title="${t.n}" onclick="setTheme(${i})"></div>`).join('');
+  applyDark();
+  const ct=document.getElementById('carryover-toggle');if(ct)ct.className='toggle'+(S.carryover?' on':'');
+  const rt=document.getElementById('reminder-toggle');if(rt)rt.className='toggle'+(S.reminders?' on':'');
+  document.getElementById('affirmations-list').innerHTML=!(S.affirmations||[]).length?'<div style="font-size:13px;color:var(--text-light);margin-bottom:4px">No custom affirmations yet.</div>':S.affirmations.map((a,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--text);font-style:italic">"${a}"</span><button style="background:none;border:none;cursor:pointer;color:var(--text-light)" onclick="delAff(${i})">✕</button></div>`).join('');
+  document.getElementById('favorites-list').innerHTML=!(S.favorites||[]).length?'<div style="font-size:13px;color:var(--text-light)">No favorites yet.</div>':S.favorites.map((f,i)=>`<div class="fav-item"><div><div class="fav-name">${f.name}</div><div class="fav-detail">${f.serving||''} · ${f.cals} kcal</div></div><button style="background:none;border:none;cursor:pointer;color:var(--text-light);font-size:14px" onclick="delFav(${i})">✕</button></div>`).join('');
+  document.getElementById('meal-name-settings').innerHTML=S.mealNames.map((m,i)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:24px;font-size:12px;color:var(--text-muted)">${i+1}.</span><input class="form-input" value="${m}" style="flex:1" oninput="updateMealName(${i},this.value)"></div>`).join('');
+  document.getElementById('templates-list').innerHTML=!(S.templates||[]).length?'<div style="font-size:13px;color:var(--text-light)">No templates saved yet.</div>':S.templates.map((t,i)=>`<div class="template-item"><div><div style="font-weight:600;font-size:.9rem;color:var(--text)">${t.name}</div><div style="font-size:.78rem;color:var(--text-muted)">${t.items.length} foods</div></div><button style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:13px" onclick="delTpl(${i})">Delete</button></div>`).join('');
+}
+function saveSettings(){S.name=document.getElementById('setting-name').value;S.goal=parseInt(document.getElementById('setting-goal').value)||2000;S.vibe=document.getElementById('setting-vibe').value;save();renderGreeting();renderHome();}
+function setTheme(i){S.theme=i;applyTheme();save();renderSettings();}
+function addAffirmation(){const inp=document.getElementById('affirmation-input');const t=inp.value.trim();if(!t)return;S.affirmations=(S.affirmations||[]);S.affirmations.push(t);inp.value='';save();renderSettings();}
+function delAff(i){S.affirmations.splice(i,1);save();renderSettings();}
+function saveFavorite(){
+  const name=document.getElementById('fav-name-input').value.trim();const cals=parseInt(document.getElementById('fav-cals-input').value)||0;if(!name||!cals)return;
+  S.favorites=(S.favorites||[]);S.favorites.push({name,cals,serving:document.getElementById('fav-serving-input').value,protein:parseInt(document.getElementById('fav-protein-input').value)||0,carbs:parseInt(document.getElementById('fav-carbs-input').value)||0,fats:parseInt(document.getElementById('fav-fats-input').value)||0});
+  save();closeModal('fav-modal');renderSettings();renderLog();if(S.favorites.length>=3)awardBadge('fav_3');
+  ['fav-name-input','fav-cals-input','fav-serving-input','fav-protein-input','fav-carbs-input','fav-fats-input'].forEach(id=>document.getElementById(id).value='');
+}
+function delFav(i){S.favorites.splice(i,1);save();renderSettings();}
+function delTpl(i){S.templates.splice(i,1);save();renderSettings();}
+function updateMealName(i,v){const o=S.mealNames[i];S.mealNames[i]=v;if(S.meals[o]){S.meals[v]=S.meals[o];delete S.meals[o];}save();}
+function changeAvatar(){avatarIdx=(avatarIdx+1)%AVATARS.length;S.avatar=AVATARS[avatarIdx];document.getElementById('profile-avatar').textContent=S.avatar;save();}
+function toggleCarryover(){S.carryover=!S.carryover;save();renderSettings();renderHome();}
+function toggleReminders(){S.reminders=!S.reminders;save();renderSettings();setupReminders();}
+
+function checkStreak(){
+  const td=today();const yd=new Date();yd.setDate(yd.getDate()-1);const yds=yd.toISOString().slice(0,10);
+  const hasT=S.mealNames.some(m=>(S.meals[m]||[]).some(f=>(f.date||td)===td));
+  if(hasT){
+    if(S.lastLogDate===yds)S.streak=(S.streak||0)+1;
+    else if(S.lastLogDate!==td)S.streak=1;
+    S.lastLogDate=td;save();
+    if(S.streak>=3)awardBadge('streak_3');
+    if(S.streak>=7){awardBadge('streak_7');checkSurprises();}
+    if(S.streak>=30){awardBadge('streak_30');checkSurprises();}
+    let aw=true;for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);if(!S.mealNames.some(m=>(S.meals[m]||[]).some(f=>(f.date||td)===ds))){aw=false;break;}}
+    if(aw)awardBadge('full_week');
+  }
+  if(document.getElementById('streak-num'))document.getElementById('streak-num').textContent=S.streak||0;
+}
+function checkBadge(){
+  const td=today();
+  if(S.mealNames.some(m=>(S.meals[m]||[]).length>0))awardBadge('first_log');
+  if(S.water>=8)awardBadge('hydrated');
+  if((S.favorites||[]).length>=3)awardBadge('fav_3');
+  let t=0;S.mealNames.forEach(m=>(S.meals[m]||[]).forEach(f=>{if((f.date||td)===td)t+=f.cals||0;}));
+  if(t>0&&t<=S.goal)awardBadge('goal_hit');
+}
+function awardBadge(id){
+  if(!(S.badges||[]).includes(id)){S.badges=(S.badges||[]);S.badges.push(id);save();const b=BADGES.find(x=>x.id===id);if(b){showToast('Badge unlocked: '+b.emoji+' '+b.name);confetti();}}
+}
+
+function logMood(emoji,mood){S.moodLog=(S.moodLog||[]);S.moodLog.push({emoji,mood,date:today()});document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('selected',b.dataset.mood===mood));save();showToast(`Mood: ${emoji} ${mood}`);}
+
+function activateCheatDay(){
+  const cap=parseInt(document.getElementById('cheat-cap-input').value)||null;
+  S.cheatDay=true;S.cheatDayDate=today();S.cheatCap=cap;
+  save();closeModal('cheat-modal');renderHome();confetti();showToast('Cheat day activated! 🎉');document.getElementById('cheat-cap-input').value='';
+}
+
+function searchLogs(q){
+  const r=document.getElementById('search-results');if(!q.trim()){r.innerHTML='';return;}
+  const all=[];S.mealNames.forEach(m=>(S.meals[m]||[]).forEach(f=>{if(f.name.toLowerCase().includes(q.toLowerCase()))all.push({...f,meal:m});}));
+  if(!all.length){r.innerHTML='<div style="font-size:13px;color:var(--text-light)">No results found.</div>';return;}
+  r.innerHTML=all.slice(0,20).map(f=>`<div class="search-result"><div><div style="font-size:.88rem;font-weight:500;color:var(--text)">${f.name}</div><div style="font-size:.75rem;color:var(--text-muted)">${f.meal} · ${f.date} · ${f.serving||''}</div></div><div style="font-size:.88rem;font-weight:600;color:var(--primary)">${f.cals} kcal</div></div>`).join('');
+}
+
+function exportPDF(){
+  const now=new Date();const ws=new Date(now);ws.setDate(now.getDate()-6);
+  let h=`<html><head><style>body{font-family:sans-serif;padding:20px;max-width:600px;margin:0 auto}h1{color:#e8617a}table{width:100%;border-collapse:collapse;margin:10px 0}th,td{padding:8px;border:1px solid #eee;text-align:left}th{background:#fdeef1}</style></head><body><h1>CalorieCutie — Weekly Summary</h1><p><b>Week:</b> ${ws.toDateString()} – ${now.toDateString()}</p><p><b>Daily goal:</b> ${S.goal} kcal | <b>Name:</b> ${S.name||'—'}</p>`;
+  let grandTotal=0,daysLogged=0;
+  for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);const ds=d.toISOString().slice(0,10);let total=0,items=[];S.mealNames.forEach(m=>(S.meals[m]||[]).forEach(f=>{if((f.date||'')===ds){total+=f.cals||0;items.push({...f,meal:m});}}));if(!items.length)continue;grandTotal+=total;daysLogged++;h+=`<h3>${d.toDateString()} — ${total} kcal ${total<=S.goal?'✅':'⚠️ over goal'}</h3><table><tr><th>Food</th><th>Meal</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fats</th></tr>`;items.forEach(f=>{h+=`<tr><td>${f.name}</td><td>${f.meal||''}</td><td>${f.cals}</td><td>${f.protein||0}g</td><td>${f.carbs||0}g</td><td>${f.fats||0}g</td></tr>`;});h+='</table>';}
+  h+=`<hr><p><b>Week total:</b> ${grandTotal} kcal across ${daysLogged} days logged. Average: ${daysLogged?Math.round(grandTotal/daysLogged):0} kcal/day</p></body></html>`;
+  const blob=new Blob([h],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`calorie-cutie-${today()}.html`;a.click();
+  showToast('Downloaded! Open in browser → Print → Save as PDF 📄');
+}
+function exportData(){const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`calorie-cutie-backup-${today()}.json`;a.click();}
+function resetData(){localStorage.removeItem('cc_v3');location.reload();}
+
+function setupReminders(){
+  if(!S.reminders)return;
+  if(!('Notification' in window))return;
+  if(Notification.permission==='default')Notification.requestPermission();
+  if(Notification.permission==='granted'){
+    const h=new Date().getHours();
+    if(h===8)new Notification('CalorieCutie 🍓',{body:'Breakfast time! Don\'t forget to log 🥣'});
+    if(h===12)new Notification('CalorieCutie 🍓',{body:'Lunch time! Log your meal 🥗'});
+    if(h===18)new Notification('CalorieCutie 🍓',{body:'Dinner time! Track your meal 🍽'});
+  }
+}
+function installPWA(){if(deferredInstall){deferredInstall.prompt();deferredInstall.userChoice.then(r=>{if(r.outcome==='accepted')showToast('App installed! 📱');deferredInstall=null;});}else showToast('Browser menu → Share → Add to Home Screen 📲');}
+
+function showToast(msg){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--surface);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;z-index:999;white-space:nowrap;opacity:0;transition:opacity .2s;max-width:90vw;text-align:center';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.style.opacity='1',10);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2800);}
+
+function confetti(){const w=document.getElementById('confetti-wrap');w.innerHTML='';w.style.display='';const cols=['#e8617a','#f7b7c2','#f0a84b','#4caf88','#8b5cf6','#0ea5e9'];for(let i=0;i<50;i++){const c=document.createElement('div');c.className='confetto';c.style.cssText=`left:${Math.random()*100}%;top:0;background:${cols[i%cols.length]};animation-delay:${Math.random()*.5}s;animation-duration:${1.5+Math.random()}s`;w.appendChild(c);}setTimeout(()=>{w.style.display='none';w.innerHTML='';},3500);}
+
+function dailyReset(){const td=today();if(S.lastWaterDate!==td){S.water=0;S.lastWaterDate=td;save();}}
+dailyReset();init();
+</script>
+</body>
+</html>
