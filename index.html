@@ -588,6 +588,15 @@ select.form-input{appearance:none}
         </div>
         <button class="btn-primary" onclick="logWorkout()">Log workout 💪</button>
       </div>
+      <div class="card">
+  <div class="card-title">✏️ Log custom exercise</div>
+  <div class="form-group"><label class="form-label">Exercise name</label><input class="form-input" id="custom-ex-name" placeholder="e.g. Zumba, Kickboxing, Gardening..."></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Duration (min)</label><input class="form-input" id="custom-ex-dur" type="number" placeholder="30"></div>
+    <div class="form-group"><label class="form-label">Calories burned</label><input class="form-input" id="custom-ex-cals" type="number" placeholder="150"></div>
+  </div>
+  <button class="btn-primary" onclick="logCustomExercise()">Log exercise 💪</button>
+</div>
       <div class="card"><div class="card-title">Workout history</div><div id="workout-history"></div></div>
       <div class="card"><div class="card-title">👟 Steps today</div><div style="display:flex;gap:7px"><input class="form-input" id="steps-input" type="number" placeholder="e.g. 8000" style="flex:1"><button class="btn-primary" style="width:auto;padding:10px 16px" onclick="logSteps()">Log</button></div><div id="steps-display" style="font-size:12px;color:var(--text-muted);margin-top:7px"></div></div>
     </div>
@@ -1252,6 +1261,19 @@ document.getElementById('workout-dur').addEventListener('input',updWorkoutPrev);
 function updWorkoutPrev(){const t=document.getElementById('workout-type').value;const dur=parseInt(document.getElementById('workout-dur').value)||0;document.getElementById('workout-preview').value=dur?Math.round((WORKOUT_CALS[t]||5)*dur)+' kcal':'';}
 function logWorkout(){const t=document.getElementById('workout-type').value;const dur=parseInt(document.getElementById('workout-dur').value)||0;if(!dur)return;const burned=Math.round((WORKOUT_CALS[t]||5)*dur);S.workoutLog=(S.workoutLog||[]);S.workoutLog.push({type:t,dur,burned,date:todayAruba()});save();renderWorkoutHistory();awardBadge('workout_log');showToast('Workout logged! 🏋️ '+burned+' kcal burned');document.getElementById('workout-dur').value='';document.getElementById('workout-preview').value='';}
 function renderWorkoutHistory(){const wh=document.getElementById('workout-history');if(!wh)return;const logs=(S.workoutLog||[]).slice(-7).reverse();if(!logs.length){wh.innerHTML='<div style="font-size:12px;color:var(--text-light)">No workouts yet</div>';return;}wh.innerHTML=logs.map(l=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:.86rem;font-weight:500;color:var(--text)">${l.type.charAt(0).toUpperCase()+l.type.slice(1)}</div><div style="font-size:.73rem;color:var(--text-muted)">${l.date} · ${l.dur} min</div></div><div style="font-size:.86rem;font-weight:600;color:var(--success)">-${l.burned} kcal</div></div>`).join('');}
+function logCustomExercise(){
+  const name=document.getElementById('custom-ex-name').value.trim();
+  const dur=parseInt(document.getElementById('custom-ex-dur').value)||0;
+  const burned=parseInt(document.getElementById('custom-ex-cals').value)||0;
+  if(!name||!burned){showToast('Enter a name and calories burned!');return;}
+  S.workoutLog=(S.workoutLog||[]);
+  S.workoutLog.push({type:name,dur,burned,date:todayAruba(),custom:true});
+  save();renderWorkoutHistory();awardBadge('workout_log');
+  showToast('Logged: '+name+' · '+burned+' kcal burned 💪');
+  document.getElementById('custom-ex-name').value='';
+  document.getElementById('custom-ex-dur').value='';
+  document.getElementById('custom-ex-cals').value='';
+}
 function logSteps(){const v=parseInt(document.getElementById('steps-input').value)||0;if(!v)return;S.stepsLog=(S.stepsLog||[]);const td=todayAruba();S.stepsLog=S.stepsLog.filter(s=>s.date!==td);S.stepsLog.push({date:td,steps:v});save();document.getElementById('steps-display').textContent=`${v.toLocaleString()} steps ≈ ${Math.round(v*0.04)} kcal burned 🔥`;document.getElementById('steps-input').value='';}
 function calcBMI(){const h=parseFloat(document.getElementById('calc-height').value);const w=parseFloat(document.getElementById('calc-weight').value);const age=parseFloat(document.getElementById('calc-age').value)||25;const act=parseFloat(document.getElementById('calc-activity').value)||1.375;const res=document.getElementById('bmi-result');if(!h||!w){res.innerHTML='<div style="color:var(--text-muted);font-size:12px">Enter height and weight</div>';return;}const bmi=w/((h/100)**2);const bmr=w*10+h*6.25-age*5-161;const tdee=bmr*act;const cat=bmi<18.5?'Underweight':bmi<25?'Normal weight':bmi<30?'Overweight':'Obese';const cc={'Underweight':'var(--warning)','Normal weight':'var(--success)','Overweight':'var(--danger)','Obese':'var(--danger)'}[cat];res.innerHTML=`<div style="display:flex;gap:14px;flex-wrap:wrap;padding-top:7px"><div><div style="font-size:10px;color:var(--text-muted)">BMI</div><div style="font-family:'Fraunces',serif;font-size:1.7rem;font-weight:700;color:${cc}">${bmi.toFixed(1)}</div><div style="font-size:11px;color:${cc}">${cat}</div></div><div><div style="font-size:10px;color:var(--text-muted)">TDEE</div><div style="font-family:'Fraunces',serif;font-size:1.7rem;font-weight:700;color:var(--primary)">${Math.round(tdee)}</div><div style="font-size:11px;color:var(--text-muted)">kcal/day</div></div><div><div style="font-size:10px;color:var(--text-muted)">Fat loss goal</div><div style="font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;color:var(--text)">${Math.round(tdee-500)}</div><div style="font-size:11px;color:var(--text-muted)">kcal/day</div></div></div>`;}
 function renderPeriodCalendar(){const y=periodViewDate.getFullYear(),mo=periodViewDate.getMonth();document.getElementById('period-month-label').textContent=periodViewDate.toLocaleString('default',{month:'long',year:'numeric'});const g=document.getElementById('period-grid');g.innerHTML='';const td=todayAruba();for(let i=0;i<new Date(y,mo,1).getDay();i++){const d=document.createElement('div');d.className='cal-day';g.appendChild(d);}for(let d=1;d<=new Date(y,mo+1,0).getDate();d++){const ds=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');const status=S.periodDays[ds];const div=document.createElement('div');let cls='period-day';if(status==='period')cls+=' period';else if(status==='fertile')cls+=' fertile';if(ds===td)cls+=' today-p';div.className=cls;div.textContent=d;div.onclick=()=>{selectedPeriodDay=ds;};g.appendChild(div);}}
