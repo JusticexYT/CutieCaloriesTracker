@@ -642,7 +642,38 @@ select.form-input{appearance:none}
   </div>
 
 </div><!-- end page-profile -->
-
+<!-- EXERCISE LOG PAGE -->
+<div class="page" id="page-exercise">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
+    <div class="section-head" style="margin:0">🏋️ Exercise Log</div>
+    <button class="icon-btn" onclick="openExModal(null)" title="Add exercise">➕</button>
+  </div>
+  <!-- CALENDAR — same as meal log -->
+  <div class="log-cal-wrap">
+    <div class="log-cal-header">
+      <button class="log-cal-nav" onclick="exCalNav(-1)">◀</button>
+      <div class="log-cal-month" id="ex-cal-month"></div>
+      <button class="log-cal-nav" onclick="exCalNav(1)">▶</button>
+    </div>
+    <div class="log-cal-dow">
+      <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+    </div>
+    <div class="log-cal-grid" id="ex-cal-grid"></div>
+    <div class="log-cal-selected-label" id="ex-cal-lbl"></div>
+  </div>
+  <!-- Day totals banner -->
+  <div id="ex-day-totals"></div>
+  <!-- Exercise sections per day -->
+  <div id="ex-sections-container"></div>
+  <!-- Quick add favorites -->
+  <div class="card" style="padding:.9rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+      <div style="font-size:12px;color:var(--text-muted)">⭐ Quick add favorite exercises</div>
+      <button class="icon-btn" onclick="openModal('fav-ex-modal')" title="Manage favorites" style="font-size:13px">Manage</button>
+    </div>
+    <div id="quick-fav-ex"></div>
+  </div>
+</div>
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <button class="bottom-nav-btn active" onclick="showPage('home',this)"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
@@ -650,6 +681,7 @@ select.form-input{appearance:none}
   <button class="bottom-nav-btn" onclick="showPage('progress',this)"><span class="nav-icon">📊</span><span class="nav-label">Progress</span></button>
   <button class="bottom-nav-btn" onclick="showPage('couple',this)"><span class="nav-icon">💕</span><span class="nav-label">Us</span></button>
   <button class="bottom-nav-btn" onclick="showPage('profile',this)"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
+<button class="bottom-nav-btn" onclick="showPage('exercise',this)"><span class="nav-icon">🏋️</span><span class="nav-label">Exercise</span></button>
 </div>
 
 </div><!-- end #app -->
@@ -745,6 +777,45 @@ select.form-input{appearance:none}
     <button class="btn-primary" onclick="document.getElementById('surprise-overlay').classList.remove('open')">💕 Thank you!</button>
   </div>
 </div>
+<!-- ADD EXERCISE MODAL -->
+<div class="modal-bg" id="ex-modal"><div class="modal">
+  <div class="modal-handle"></div><div class="modal-title">Log exercise 💪</div>
+  <div class="form-group"><label class="form-label">Category</label><select class="form-input" id="ex-section-sel"></select></div>
+  <div class="form-group"><label class="form-label">Exercise name</label><input class="form-input" id="ex-name-inp" placeholder="e.g. Running, Squats, Yoga..."></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Duration (min)</label><input class="form-input" id="ex-dur-inp" type="number" placeholder="30"></div>
+    <div class="form-group"><label class="form-label">Calories burned</label><input class="form-input" id="ex-cals-inp" type="number" placeholder="200"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Sets (optional)</label><input class="form-input" id="ex-sets-inp" type="number" placeholder="3"></div>
+    <div class="form-group"><label class="form-label">Reps (optional)</label><input class="form-input" id="ex-reps-inp" type="number" placeholder="12"></div>
+    <div class="form-group"><label class="form-label">Weight kg (opt)</label><input class="form-input" id="ex-wt-inp" type="number" placeholder="50"></div>
+  </div>
+  <div style="display:flex;gap:7px;align-items:center;margin-bottom:.9rem">
+    <input type="checkbox" id="ex-fav-chk" style="width:16px;height:16px">
+    <label for="ex-fav-chk" style="font-size:12px;color:var(--text-muted)">⭐ Save as favorite exercise</label>
+  </div>
+  <button class="btn-primary" onclick="addExercise()">Log exercise 💪</button>
+  <button class="btn-secondary" onclick="closeModal('ex-modal')" style="width:100%">Cancel</button>
+</div></div>
+
+<!-- ADD FAVORITE EXERCISE MODAL -->
+<div class="modal-bg" id="fav-ex-modal"><div class="modal">
+  <div class="modal-handle"></div><div class="modal-title">Add favorite exercise ⭐</div>
+  <div class="form-group"><label class="form-label">Category</label><select class="form-input" id="fav-ex-sec"></select></div>
+  <div class="form-group"><label class="form-label">Exercise name</label><input class="form-input" id="fav-ex-nm" placeholder="e.g. Morning run"></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Duration (min)</label><input class="form-input" id="fav-ex-dur" type="number" placeholder="30"></div>
+    <div class="form-group"><label class="form-label">Calories burned</label><input class="form-input" id="fav-ex-cals" type="number" placeholder="200"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Sets (optional)</label><input class="form-input" id="fav-ex-sets" type="number" placeholder="3"></div>
+    <div class="form-group"><label class="form-label">Reps (optional)</label><input class="form-input" id="fav-ex-reps" type="number" placeholder="12"></div>
+    <div class="form-group"><label class="form-label">Weight kg (opt)</label><input class="form-input" id="fav-ex-wt" type="number" placeholder="50"></div>
+  </div>
+  <button class="btn-primary" onclick="saveFavEx()">Save favorite ⭐</button>
+  <button class="btn-secondary" onclick="closeModal('fav-ex-modal')" style="width:100%">Cancel</button>
+</div></div>
 <div class="confetti-wrap" id="confetti-wrap" style="display:none"></div>
 
 <script>
@@ -835,7 +906,7 @@ function defaultState(){
     templates:[],specialDates:[],surprises:[],shownSurprises:[],
     carryover:false,reminders:false,dangerFoods:[],
     workoutLog:[],stepsLog:[],journalLog:[],periodDays:{},cycleLength:28,
-    challengeDate:'',challengeDone:false,
+    challengeDate:'',challengeDone:false,exerciseNames:['Cardio','Strength','Flexibility','Other'],exercises:{Cardio:[],Strength:[],Flexibility:[],Other:[]},favoriteExercises:[],
   };
 }
 let S=defaultState();
@@ -858,7 +929,7 @@ let periodViewDate=new Date();
 let selectedPeriodDay=null;
 let currentMealTarget=null;
 let deferredInstall=null;
-let logCalViewDate=null;// calendar in log page view month
+let logCalViewDate=null;let exCalViewDate=null;let selectedExDay=null;
 let selectedLogDay=null;// which day is selected in log calendar
 window.addEventListener('beforeinstallprompt',e=>{deferredInstall=e;});
 
@@ -874,8 +945,7 @@ function startApp(user){
   // Init log calendar to today (Aruba time)
   const arubaToday=getArubaDate();
   logCalViewDate=new Date(arubaToday.getFullYear(),arubaToday.getMonth(),1);
-  selectedLogDay=todayAruba();
-  updateNavUser();
+selectedLogDay=todayAruba();exCalViewDate=new Date(arubaToday.getFullYear(),arubaToday.getMonth(),1);selectedExDay=todayAruba();  updateNavUser();
   renderGreeting();renderHome();renderLog();renderCouple();
   checkStreak();checkPendingReaction();checkSurprises();setupReminders();renderDailyChallenge();
   document.querySelectorAll('.modal-bg').forEach(b=>b.addEventListener('click',e=>{if(e.target===b)b.classList.remove('open');}));
@@ -916,7 +986,7 @@ function showPage(name,btn){
   if(name==='progress')renderWeekChart();
   if(name==='couple')renderCouple();
   if(name==='profile')renderProfilePage();
-  if(name==='log')renderLogCalendar();
+  if(name==='log')renderLogCalendar();if(name==='exercise')renderExercisePage();
 }
 function openModal(id,meal){
   if(id==='food-modal'){
@@ -927,6 +997,8 @@ function openModal(id,meal){
   }
   if(id==='ai-modal'){const sel=document.getElementById('ai-meal-select');sel.innerHTML='';S.mealNames.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);});}
   if(id==='template-modal')renderTemplateModal();
+if(id==='ex-modal'){const sel=document.getElementById('ex-section-sel');sel.innerHTML='';(S.exerciseNames||['Cardio','Strength','Flexibility','Other']).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o);});if(meal)sel.value=meal;}
+if(id==='fav-ex-modal'){const sel=document.getElementById('fav-ex-sec');sel.innerHTML='';(S.exerciseNames||['Cardio','Strength','Flexibility','Other']).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o);});}
   document.getElementById(id).classList.add('open');
 }
 function closeModal(id){document.getElementById(id).classList.remove('open');}
@@ -1316,6 +1388,120 @@ function setupReminders(){if(!S.reminders||!('Notification' in window))return;if
 /* ============================================================
    UTILS
 ============================================================ */
+/* ============================================================
+   EXERCISE LOG
+============================================================ */
+function renderExercisePage(){
+  if(!exCalViewDate){const ad=getArubaDate();exCalViewDate=new Date(ad.getFullYear(),ad.getMonth(),1);selectedExDay=todayAruba();}
+  renderExCalendar();renderExercisesForDay();renderQuickFavEx();
+}
+function renderExCalendar(){
+  const today=todayAruba();const y=exCalViewDate.getFullYear();const mo=exCalViewDate.getMonth();
+  const mons=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('ex-cal-month').textContent=mons[mo]+' '+y;
+  const grid=document.getElementById('ex-cal-grid');grid.innerHTML='';
+  const fdow=new Date(y,mo,1).getDay();const dim=new Date(y,mo+1,0).getDate();
+  for(let i=0;i<fdow;i++){const d=document.createElement('div');d.className='lc-day other-month';grid.appendChild(d);}
+  for(let d=1;d<=dim;d++){
+    const ds=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const hasEx=(S.exerciseNames||[]).some(n=>(S.exercises[n]||[]).some(e=>(e.date||today)===ds));
+    const div=document.createElement('div');
+    let cls='lc-day';
+    if(hasEx)cls+=' has-meals';
+    if(ds===today)cls+=' today-aruba';
+    if(ds===selectedExDay)cls+=' selected';
+    div.className=cls;div.textContent=d;
+    div.onclick=()=>{selectedExDay=ds;renderExCalendar();renderExercisesForDay();};
+    grid.appendChild(div);
+  }
+  const lbl=document.getElementById('ex-cal-lbl');
+  if(selectedExDay){
+    const d=new Date(selectedExDay+'T12:00:00');
+    const isToday=selectedExDay===today;
+    lbl.textContent=(isToday?'📅 Today — ':'')+d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})+(isToday?' (Aruba time)':'');
+  }
+}
+function exCalNav(dir){exCalViewDate=new Date(exCalViewDate.getFullYear(),exCalViewDate.getMonth()+dir,1);renderExCalendar();}
+function renderExercisesForDay(){
+  const c=document.getElementById('ex-sections-container');c.innerHTML='';
+  const totEl=document.getElementById('ex-day-totals');
+  const day=selectedExDay||todayAruba();const today=todayAruba();
+  if(day>today){c.innerHTML='<div class="card" style="text-align:center;color:var(--text-muted);font-size:.88rem">📅 Future date — come back then!</div>';totEl.innerHTML='';return;}
+  let totalBurned=0,totalDur=0;
+  (S.exerciseNames||['Cardio','Strength','Flexibility','Other']).forEach(secName=>{
+    const items=(S.exercises[secName]||[]).filter(e=>(e.date||today)===day);
+    totalBurned+=items.reduce((s,e)=>s+(e.cals||0),0);
+    totalDur+=items.reduce((s,e)=>s+(e.dur||0),0);
+    const sec=document.createElement('div');sec.className='card';
+    let h=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><div style="font-weight:600;font-size:.88rem">${secName}</div><div style="font-size:.76rem;color:var(--text-muted)">${items.reduce((s,e)=>s+(e.cals||0),0)} kcal burned</div></div>`;
+    if(!items.length)h+=`<div style="font-size:12px;color:var(--text-light);padding:5px 0">Nothing logged</div>`;
+    items.forEach((e,i)=>{
+      let det=[];if(e.dur)det.push(e.dur+' min');if(e.sets)det.push(e.sets+'×'+(e.reps||'?')+(e.weight?' @ '+e.weight+'kg':''));if(e.time)det.push(e.time);
+      h+=`<div class="meal-item"><div><div style="font-size:.86rem;color:var(--text)">${e.name}</div><div style="font-size:.76rem;color:var(--text-muted)">${det.join(' · ')}</div></div><div style="display:flex;align-items:center;gap:5px"><div style="font-size:.86rem;font-weight:600;color:var(--success)">${e.cals?'-'+e.cals+' kcal':''}</div><button class="meal-item-del" onclick="delExercise('${secName}',${i},'${day}')">✕</button></div></div>`;
+    });
+    h+=`<button class="add-food-btn" onclick="openExModal('${secName}')">+ Add to ${secName}</button>`;
+    sec.innerHTML=h;c.appendChild(sec);
+  });
+  totEl.innerHTML=totalBurned>0?`<div style="background:linear-gradient(135deg,var(--success),#2d7a50);border-radius:14px;padding:12px 16px;color:#fff;display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem"><div><div style="font-size:10px;opacity:.85">Total burned today</div><div style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700">-${totalBurned} kcal</div></div><div style="text-align:right"><div style="font-size:10px;opacity:.85">Duration</div><div style="font-size:1rem;font-weight:600">${totalDur} min</div></div></div>`:'';
+}
+function openExModal(section){
+  const sel=document.getElementById('ex-section-sel');sel.innerHTML='';
+  (S.exerciseNames||['Cardio','Strength','Flexibility','Other']).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o);});
+  if(section)sel.value=section;
+  openModal('ex-modal');
+}
+function addExercise(){
+  const section=document.getElementById('ex-section-sel').value;
+  const name=document.getElementById('ex-name-inp').value.trim();
+  const dur=parseInt(document.getElementById('ex-dur-inp').value)||0;
+  const cals=parseInt(document.getElementById('ex-cals-inp').value)||0;
+  const sets=parseInt(document.getElementById('ex-sets-inp').value)||0;
+  const reps=parseInt(document.getElementById('ex-reps-inp').value)||0;
+  const weight=parseFloat(document.getElementById('ex-wt-inp').value)||0;
+  const isFav=document.getElementById('ex-fav-chk').checked;
+  if(!name){showToast('Enter an exercise name!');return;}
+  if(!S.exercises)S.exercises={};if(!S.exercises[section])S.exercises[section]=[];
+  const now=getArubaDate();const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  const logDay=selectedExDay||todayAruba();
+  S.exercises[section].push({name,dur,cals,sets,reps,weight,date:logDay,time});
+  if(isFav&&!(S.favoriteExercises||[]).find(f=>f.name===name)){S.favoriteExercises=(S.favoriteExercises||[]);S.favoriteExercises.push({name,section,dur,cals,sets,reps,weight});}
+  save();closeModal('ex-modal');
+  ['ex-name-inp','ex-dur-inp','ex-cals-inp','ex-sets-inp','ex-reps-inp','ex-wt-inp'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ex-fav-chk').checked=false;
+  renderExercisesForDay();renderExCalendar();
+  showToast('Exercise logged! 💪'+(cals?' -'+cals+' kcal':''));
+}
+function delExercise(section,idx,day){
+  const today=todayAruba();const items=(S.exercises[section]||[]).filter(e=>(e.date||today)===day);const item=items[idx];const gi=(S.exercises[section]||[]).indexOf(item);
+  if(gi>=0)S.exercises[section].splice(gi,1);
+  save();renderExercisesForDay();renderExCalendar();
+}
+function renderQuickFavEx(){
+  const el=document.getElementById('quick-fav-ex');if(!el)return;
+  if(!(S.favoriteExercises||[]).length){el.innerHTML='<div style="font-size:12px;color:var(--text-light)">Log an exercise and check ⭐ to save as favorite!</div>';return;}
+  el.innerHTML=S.favoriteExercises.slice(0,6).map((f,i)=>`<div class="fav-item"><div><div style="font-size:.88rem;font-weight:500;color:var(--text)">${f.name}</div><div style="font-size:.76rem;color:var(--text-muted)">${f.section}${f.dur?' · '+f.dur+' min':''}${f.cals?' · '+f.cals+' kcal':''}</div></div><button class="quick-add-btn" onclick="qAddFavEx(${i})">+ Add</button></div>`).join('');
+}
+function qAddFavEx(i){
+  const f=S.favoriteExercises[i];const section=f.section||'Other';
+  if(!S.exercises)S.exercises={};if(!S.exercises[section])S.exercises[section]=[];
+  const now=getArubaDate();const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  S.exercises[section].push({...f,date:selectedExDay||todayAruba(),time});
+  save();renderExercisesForDay();renderExCalendar();showToast('Added: '+f.name+' ✅');
+}
+function saveFavEx(){
+  const name=document.getElementById('fav-ex-nm').value.trim();
+  const section=document.getElementById('fav-ex-sec').value;
+  const dur=parseInt(document.getElementById('fav-ex-dur').value)||0;
+  const cals=parseInt(document.getElementById('fav-ex-cals').value)||0;
+  const sets=parseInt(document.getElementById('fav-ex-sets').value)||0;
+  const reps=parseInt(document.getElementById('fav-ex-reps').value)||0;
+  const weight=parseFloat(document.getElementById('fav-ex-wt').value)||0;
+  if(!name){showToast('Enter an exercise name!');return;}
+  S.favoriteExercises=(S.favoriteExercises||[]);S.favoriteExercises.push({name,section,dur,cals,sets,reps,weight});
+  save();closeModal('fav-ex-modal');
+  ['fav-ex-nm','fav-ex-dur','fav-ex-cals','fav-ex-sets','fav-ex-reps','fav-ex-wt'].forEach(id=>document.getElementById(id).value='');
+  renderQuickFavEx();showToast('Favorite exercise saved ⭐');
+}
 function showToast(msg){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--surface);padding:9px 18px;border-radius:20px;font-size:12px;font-weight:500;z-index:999;white-space:nowrap;opacity:0;transition:opacity .2s;max-width:90vw;text-align:center';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.style.opacity='1',10);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2800);}
 function confetti(){const w=document.getElementById('confetti-wrap');w.innerHTML='';w.style.display='';const cols=['#e8617a','#f7b7c2','#f0a84b','#4caf88','#8b5cf6','#0ea5e9'];for(let i=0;i<50;i++){const c=document.createElement('div');c.className='confetto';c.style.cssText=`left:${Math.random()*100}%;top:0;background:${cols[i%cols.length]};animation-delay:${Math.random()*.5}s;animation-duration:${1.5+Math.random()}s`;w.appendChild(c);}setTimeout(()=>{w.style.display='none';w.innerHTML='';},3500);}
 function dailyReset(){if(!CU)return;const td=todayAruba();if(S.lastWaterDate!==td){S.water=0;S.lastWaterDate=td;save();}}
