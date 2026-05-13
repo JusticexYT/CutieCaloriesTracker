@@ -251,13 +251,10 @@ select.form-input{appearance:none}
 .surprise-overlay.open .surprise-box{transform:scale(1)}
 
 /* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--primary) transparent;padding:5px 0 max(5px,env(safe-area-inset-bottom));z-index:100}
-.bottom-nav::-webkit-scrollbar{height:3px}
-.bottom-nav::-webkit-scrollbar-track{background:var(--border);border-radius:2px}
-.bottom-nav::-webkit-scrollbar-thumb{background:var(--primary);border-radius:2px}
-.bottom-nav-btn{flex:0 0 auto;min-width:62px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;padding:5px 8px;color:var(--text-light);transition:color .2s;font-family:'DM Sans',sans-serif}
-.bottom-nav-btn .nav-icon{font-size:18px}
-.bottom-nav-btn .nav-label{font-size:9px;font-weight:500;white-space:nowrap}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:5px 0 max(5px,env(safe-area-inset-bottom));z-index:100}
+.bottom-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;padding:5px;color:var(--text-light);transition:color .2s;font-family:'DM Sans',sans-serif}
+.bottom-nav-btn .nav-icon{font-size:19px}
+.bottom-nav-btn .nav-label{font-size:9px;font-weight:500}
 .bottom-nav-btn.active{color:var(--primary)}
 
 /* CONFETTI */
@@ -1151,7 +1148,7 @@ function addFood(){
   // Log to selected day (or today if selected is today)
   const logDay=selectedLogDay||todayAruba();
   S.meals[meal].push({name,cals,serving:mult!==1?`${mult}× ${serving}`:serving,protein,carbs,fats,fiber,date:logDay,time});
-  if(isFav&&!S.favorites.find(f=>f.name===name))S.favorites.push({name,cals,serving:mult!==1?mult+'× '+serving:serving,protein,carbs,fats,fiber});
+  if(isFav&&!S.favorites.find(f=>f.name===name))S.favorites.push({name,cals:rawC,serving,protein:Math.round(protein/mult),carbs:Math.round(carbs/mult),fats:Math.round(fats/mult)});
   save();closeModal('food-modal');
   ['food-name-input','food-cals-input','food-serving-input','food-protein-input','food-carbs-input','food-fats-input','food-fiber-input'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('food-fav-check').checked=false;
