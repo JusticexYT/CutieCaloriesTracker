@@ -257,6 +257,18 @@ select.form-input{appearance:none}
 .bottom-nav-btn .nav-label{font-size:9px;font-weight:500}
 .bottom-nav-btn.active{color:var(--primary)}
 
+/* QUICK FAV CHIPS */
+.qf-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--primary) transparent}
+.qf-scroll::-webkit-scrollbar{height:3px}
+.qf-scroll::-webkit-scrollbar-track{background:var(--border);border-radius:2px}
+.qf-scroll::-webkit-scrollbar-thumb{background:var(--primary);border-radius:2px}
+.qf-chip{flex:0 0 auto;background:var(--surface2);border:1.5px solid var(--border);border-radius:14px;padding:10px 11px;min-width:110px;max-width:148px;transition:border .2s;cursor:default}
+.qf-chip:hover{border-color:var(--primary)}
+.qf-chip-name{font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qf-chip-sub{font-size:.71rem;color:var(--text-muted);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qf-chip-btn{width:100%;background:var(--primary);color:#fff;border:none;border-radius:8px;padding:5px;font-size:.73rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s}
+.qf-chip-btn:hover{background:var(--primary-dark)}
+
 /* CONFETTI */
 .confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:999}
 .confetto{position:absolute;width:8px;height:8px;border-radius:2px;animation:fall 2s ease-in forwards}
@@ -433,8 +445,11 @@ select.form-input{appearance:none}
   <div id="swap-suggestion" style="display:none" class="card"><div style="font-size:.83rem;color:var(--text-muted)" id="swap-text"></div></div>
   <div id="meals-container"></div>
   <div class="card" style="padding:.9rem">
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:9px">⭐ Quick add favorites</div>
-    <div id="quick-favs"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+      <div style="font-size:12px;color:var(--text-muted);font-weight:500">⭐ Quick add favorites</div>
+      <button onclick="openModal('manage-favs-modal')" style="background:var(--primary-light);color:var(--primary);border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Manage ⚙️</button>
+    </div>
+    <div class="qf-scroll" id="quick-favs"></div>
   </div>
 </div>
 
@@ -668,10 +683,10 @@ select.form-input{appearance:none}
   <!-- Quick add favorites -->
   <div class="card" style="padding:.9rem">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
-      <div style="font-size:12px;color:var(--text-muted)">⭐ Quick add favorite exercises</div>
-      <button class="icon-btn" onclick="openModal('fav-ex-modal')" title="Manage favorites" style="font-size:13px">Manage</button>
+      <div style="font-size:12px;color:var(--text-muted);font-weight:500">⭐ Quick add favorites</div>
+      <button onclick="openModal('manage-fav-ex-modal')" style="background:var(--primary-light);color:var(--primary);border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Manage ⚙️</button>
     </div>
-    <div id="quick-fav-ex"></div>
+    <div class="qf-scroll" id="quick-fav-ex"></div>
   </div>
 </div>
 <!-- BOTTOM NAV -->
@@ -815,6 +830,27 @@ select.form-input{appearance:none}
   </div>
   <button class="btn-primary" onclick="saveFavEx()">Save favorite ⭐</button>
   <button class="btn-secondary" onclick="closeModal('fav-ex-modal')" style="width:100%">Cancel</button>
+</div></div>
+<!-- MANAGE MEAL FAVORITES MODAL -->
+<div class="modal-bg" id="manage-favs-modal"><div class="modal">
+  <div class="modal-handle"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem">
+    <div class="modal-title" style="margin:0">⭐ Manage favorites</div>
+    <button onclick="closeModal('manage-favs-modal');openModal('fav-modal')" style="background:var(--primary);color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">+ Add new</button>
+  </div>
+  <div id="manage-favs-list"></div>
+  <button class="btn-secondary" onclick="closeModal('manage-favs-modal')" style="width:100%;margin-top:10px">Done ✓</button>
+</div></div>
+
+<!-- MANAGE EXERCISE FAVORITES MODAL -->
+<div class="modal-bg" id="manage-fav-ex-modal"><div class="modal">
+  <div class="modal-handle"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem">
+    <div class="modal-title" style="margin:0">⭐ Manage exercise favorites</div>
+    <button onclick="closeModal('manage-fav-ex-modal');openModal('fav-ex-modal')" style="background:var(--primary);color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">+ Add new</button>
+  </div>
+  <div id="manage-fav-ex-list"></div>
+  <button class="btn-secondary" onclick="closeModal('manage-fav-ex-modal')" style="width:100%;margin-top:10px">Done ✓</button>
 </div></div>
 <div class="confetti-wrap" id="confetti-wrap" style="display:none"></div>
 
@@ -997,6 +1033,8 @@ function openModal(id,meal){
   }
   if(id==='ai-modal'){const sel=document.getElementById('ai-meal-select');sel.innerHTML='';S.mealNames.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);});}
   if(id==='template-modal')renderTemplateModal();
+  if(id==='manage-favs-modal')renderManageFavs();
+  if(id==='manage-fav-ex-modal')renderManageFavEx();
 if(id==='ex-modal'){const sel=document.getElementById('ex-section-sel');sel.innerHTML='';(S.exerciseNames||['Cardio','Strength','Flexibility','Other']).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o);});if(meal)sel.value=meal;}
 if(id==='fav-ex-modal'){const sel=document.getElementById('fav-ex-sec');sel.innerHTML='';(S.exerciseNames||['Cardio','Strength','Flexibility','Other']).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o);});}
   document.getElementById(id).classList.add('open');
@@ -1108,10 +1146,7 @@ function checkPeriodWarning(){const cl=S.cycleLength||28;const pd=Object.entries
 function renderLog(){
   renderLogCalendar();
   renderMealsForSelectedDay();
-  // Quick favs
-  const qf=document.getElementById('quick-favs');
-  if(!(S.favorites||[]).length){qf.innerHTML='<div style="font-size:12px;color:var(--text-light)">Add favorites in Profile → Meals!</div>';return;}
-  qf.innerHTML=S.favorites.slice(0,6).map((f,i)=>`<div class="fav-item"><div><div style="font-size:.88rem;font-weight:500;color:var(--text)">${f.name}</div><div style="font-size:.76rem;color:var(--text-muted)">${f.cals} kcal</div></div><button class="quick-add-btn" onclick="qAddFav(${i})">+ Add</button></div>`).join('');
+  renderQuickFavs();
 }
 function renderMealsForSelectedDay(){
   const c=document.getElementById('meals-container');c.innerHTML='';
@@ -1476,11 +1511,28 @@ function delExercise(section,idx,day){
   if(gi>=0)S.exercises[section].splice(gi,1);
   save();renderExercisesForDay();renderExCalendar();
 }
+function renderQuickFavs(){
+  const el=document.getElementById('quick-favs');if(!el)return;
+  if(!(S.favorites||[]).length){el.innerHTML='<div style="font-size:12px;color:var(--text-light)">Add favorites in Profile → Meals!</div>';return;}
+  el.innerHTML=(S.favorites||[]).map((f,i)=>`<div class="qf-chip"><div class="qf-chip-name">${f.name}</div><div class="qf-chip-sub">${f.cals} kcal${f.serving?' · '+f.serving:''}</div><button class="qf-chip-btn" onclick="qAddFav(${i})">+ Add</button></div>`).join('');
+}
 function renderQuickFavEx(){
   const el=document.getElementById('quick-fav-ex');if(!el)return;
-  if(!(S.favoriteExercises||[]).length){el.innerHTML='<div style="font-size:12px;color:var(--text-light)">Log an exercise and check ⭐ to save as favorite!</div>';return;}
-  el.innerHTML=S.favoriteExercises.slice(0,6).map((f,i)=>`<div class="fav-item"><div><div style="font-size:.88rem;font-weight:500;color:var(--text)">${f.name}</div><div style="font-size:.76rem;color:var(--text-muted)">${f.section}${f.dur?' · '+f.dur+' min':''}${f.cals?' · '+f.cals+' kcal':''}</div></div><button class="quick-add-btn" onclick="qAddFavEx(${i})">+ Add</button></div>`).join('');
+  if(!(S.favoriteExercises||[]).length){el.innerHTML='<div style="font-size:12px;color:var(--text-light)">Log an exercise and check ⭐ to save!</div>';return;}
+  el.innerHTML=(S.favoriteExercises||[]).map((f,i)=>`<div class="qf-chip"><div class="qf-chip-name">${f.name}</div><div class="qf-chip-sub">${f.section}${f.cals?' · '+f.cals+' kcal':''}</div><button class="qf-chip-btn" onclick="qAddFavEx(${i})">+ Add</button></div>`).join('');
 }
+function renderManageFavs(){
+  const el=document.getElementById('manage-favs-list');if(!el)return;
+  if(!(S.favorites||[]).length){el.innerHTML='<div style="font-size:12px;color:var(--text-light);padding:10px 0">No favorites yet. Tap "+ Add new" to get started!</div>';return;}
+  el.innerHTML=(S.favorites||[]).map((f,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)"><div style="flex:1;min-width:0"><div style="font-size:.88rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.name}</div><div style="font-size:.76rem;color:var(--text-muted);margin-top:2px">${f.cals} kcal${f.serving?' · '+f.serving:''}${f.protein?' · P:'+f.protein+'g':''}</div></div><button onclick="delFavManage(${i})" style="background:var(--danger);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:10px;flex-shrink:0">Remove</button></div>`).join('');
+}
+function delFavManage(i){S.favorites.splice(i,1);save();renderManageFavs();renderQuickFavs();}
+function renderManageFavEx(){
+  const el=document.getElementById('manage-fav-ex-list');if(!el)return;
+  if(!(S.favoriteExercises||[]).length){el.innerHTML='<div style="font-size:12px;color:var(--text-light);padding:10px 0">No favorite exercises yet. Tap "+ Add new" to get started!</div>';return;}
+  el.innerHTML=(S.favoriteExercises||[]).map((f,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)"><div style="flex:1;min-width:0"><div style="font-size:.88rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.name}</div><div style="font-size:.76rem;color:var(--text-muted);margin-top:2px">${f.section}${f.dur?' · '+f.dur+' min':''}${f.cals?' · '+f.cals+' kcal':''}${f.sets?' · '+f.sets+'×'+(f.reps||'?')+(f.weight?' @ '+f.weight+'kg':''):''}</div></div><button onclick="delFavExManage(${i})" style="background:var(--danger);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:10px;flex-shrink:0">Remove</button></div>`).join('');
+}
+function delFavExManage(i){S.favoriteExercises.splice(i,1);save();renderManageFavEx();renderQuickFavEx();}
 function qAddFavEx(i){
   const f=S.favoriteExercises[i];const section=f.section||'Other';
   if(!S.exercises)S.exercises={};if(!S.exercises[section])S.exercises[section]=[];
