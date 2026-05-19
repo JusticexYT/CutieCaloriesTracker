@@ -963,7 +963,7 @@ const AVATARS=['🌸','🌺','🦋','🌙','⭐','🌈','🍓','🌻','💫','�
 let calViewDate=new Date();
 let periodViewDate=new Date();
 let selectedPeriodDay=null;
-let currentMealTarget=null;
+let currentMealTarget=null;let editFoodTarget=null;let editExTarget=null;
 let deferredInstall=null;
 let logCalViewDate=null;let exCalViewDate=null;let selectedExDay=null;
 let selectedLogDay=null;// which day is selected in log calendar
@@ -1039,7 +1039,67 @@ if(id==='ex-modal'){const sel=document.getElementById('ex-section-sel');sel.inne
 if(id==='fav-ex-modal'){const sel=document.getElementById('fav-ex-sec');sel.innerHTML='';(S.exerciseNames||['Cardio','Strength','Flexibility','Other']).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o);});}
   document.getElementById(id).classList.add('open');
 }
-function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  if(id==='food-modal'){
+    editFoodTarget=null;
+    const btn=document.querySelector('#food-modal .btn-primary');
+    if(btn)btn.textContent='Add food';
+  }
+  if(id==='ex-modal'){
+    editExTarget=null;
+    const btn=document.querySelector('#ex-modal .btn-primary');
+    if(btn)btn.textContent='Log exercise 💪';
+  }
+}
+function editFood(meal,idx,day){
+  const today=todayAruba();
+  const items=(S.meals[meal]||[]).filter(f=>(f.date||today)===day);
+  const f=items[idx];if(!f)return;
+  const gIdx=(S.meals[meal]||[]).indexOf(f);
+  editFoodTarget={gIdx,meal,day};
+  // Pre-fill meal select
+  const sel=document.getElementById('food-meal-select');sel.innerHTML='';
+  S.mealNames.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);});
+  sel.value=meal;
+  // Pre-fill all fields
+  document.getElementById('food-name-input').value=f.name||'';
+  document.getElementById('food-cals-input').value=f.cals||'';
+  document.getElementById('food-serving-input').value=f.serving||'';
+  document.getElementById('food-protein-input').value=f.protein||0;
+  document.getElementById('food-carbs-input').value=f.carbs||0;
+  document.getElementById('food-fats-input').value=f.fats||0;
+  document.getElementById('food-fiber-input').value=f.fiber||0;
+  document.getElementById('serving-mult').value=1;
+  document.getElementById('mult-val').textContent=1;
+  // Open modal and change button label
+  document.getElementById('food-modal').classList.add('open');
+  const btn=document.querySelector('#food-modal .btn-primary');
+  if(btn)btn.textContent='Update food ✏️';
+}
+function editExercise(section,idx,day){
+  const today=todayAruba();
+  const items=(S.exercises[section]||[]).filter(e=>(e.date||today)===day);
+  const e=items[idx];if(!e)return;
+  const gIdx=(S.exercises[section]||[]).indexOf(e);
+  editExTarget={gIdx,section,day};
+  // Pre-fill section select
+  const sel=document.getElementById('ex-section-sel');sel.innerHTML='';
+  (S.exerciseNames||['Cardio','Strength','Flexibility','Other']).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o);});
+  sel.value=section;
+  // Pre-fill all fields
+  document.getElementById('ex-name-inp').value=e.name||'';
+  document.getElementById('ex-dur-inp').value=e.dur||'';
+  document.getElementById('ex-cals-inp').value=e.cals||'';
+  document.getElementById('ex-sets-inp').value=e.sets||'';
+  document.getElementById('ex-reps-inp').value=e.reps||'';
+  document.getElementById('ex-wt-inp').value=e.weight||'';
+  document.getElementById('ex-fav-chk').checked=false;
+  // Open modal and change button label
+  document.getElementById('ex-modal').classList.add('open');
+  const btn=document.querySelector('#ex-modal .btn-primary');
+  if(btn)btn.textContent='Update exercise ✏️';
+}
 
 /* ============================================================
    LOG CALENDAR (Aruba time, purple theme)
@@ -1160,7 +1220,7 @@ function renderMealsForSelectedDay(){
     const sec=document.createElement('div');sec.className='card';
     let h=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px"><div style="font-weight:600;font-size:.88rem">${mName}</div><div style="font-size:.78rem;color:var(--text-muted)">${tc} kcal</div></div>`;
     if(!items.length)h+=`<div style="font-size:12px;color:var(--text-light);padding:5px 0">Nothing logged</div>`;
-    items.forEach((f,i)=>{h+=`<div class="meal-item"><div><div style="font-size:.86rem;color:var(--text)">${f.name}${f.mealMood?' '+f.mealMood:''}</div><div style="font-size:.76rem;color:var(--text-muted)">${f.serving||''}${f.time?' · '+f.time:''}</div></div><div style="display:flex;align-items:center;gap:5px"><div style="font-size:.86rem;font-weight:600;color:var(--primary)">${f.cals} kcal</div><button style="background:none;border:none;cursor:pointer;font-size:13px" onclick="pickMealMood('${mName}',${i},'${day}')">😶</button><button class="meal-item-del" onclick="delFood('${mName}',${i},'${day}')">✕</button></div></div>`;});
+    items.forEach((f,i)=>{h+=`<div class="meal-item"><div><div style="font-size:.86rem;color:var(--text)">${f.name}${f.mealMood?' '+f.mealMood:''}</div><div style="font-size:.76rem;color:var(--text-muted)">${f.serving||''}${f.time?' · '+f.time:''}</div></div><div style="display:flex;align-items:center;gap:5px"><div style="font-size:.86rem;font-weight:600;color:var(--primary)">${f.cals} kcal</div><button style="background:none;border:none;cursor:pointer;font-size:13px" onclick="pickMealMood('${mName}',${i},'${day}')">😶</button><button style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--purple)" onclick="editFood('${mName}',${i},'${day}')" title="Edit">✏️</button><button class="meal-item-del" onclick="delFood('${mName}',${i},'${day}')">✕</button></div></div>`;});
     h+=`<button class="add-food-btn" onclick="openModal('food-modal','${mName}')">+ Add food to ${mName}</button>`;
     sec.innerHTML=h;c.appendChild(sec);
   });
@@ -1178,6 +1238,15 @@ function addFood(){
   const fats=Math.round((parseInt(document.getElementById('food-fats-input').value)||0)*mult);
   const fiber=Math.round((parseInt(document.getElementById('food-fiber-input').value)||0)*mult);
   const isFav=document.getElementById('food-fav-check').checked;
+  // EDIT MODE — update existing entry instead of adding new
+  if(editFoodTarget){
+    const {gIdx,meal:eMeal}=editFoodTarget;
+    S.meals[eMeal][gIdx]={...S.meals[eMeal][gIdx],name,cals,serving:mult!==1?`${mult}× ${serving}`:serving,protein,carbs,fats,fiber};
+    editFoodTarget=null;
+    closeModal('food-modal');
+    save();renderMealsForSelectedDay();renderLogCalendar();renderHome();
+    showToast('Food updated! ✅');return;
+  }
   if(!S.meals[meal])S.meals[meal]=[];
   const now=getArubaDate();const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
   // Log to selected day (or today if selected is today)
@@ -1472,7 +1541,7 @@ function renderExercisesForDay(){
     if(!items.length)h+=`<div style="font-size:12px;color:var(--text-light);padding:5px 0">Nothing logged</div>`;
     items.forEach((e,i)=>{
       let det=[];if(e.dur)det.push(e.dur+' min');if(e.sets)det.push(e.sets+'×'+(e.reps||'?')+(e.weight?' @ '+e.weight+'kg':''));if(e.time)det.push(e.time);
-      h+=`<div class="meal-item"><div><div style="font-size:.86rem;color:var(--text)">${e.name}</div><div style="font-size:.76rem;color:var(--text-muted)">${det.join(' · ')}</div></div><div style="display:flex;align-items:center;gap:5px"><div style="font-size:.86rem;font-weight:600;color:var(--success)">${e.cals?'-'+e.cals+' kcal':''}</div><button class="meal-item-del" onclick="delExercise('${secName}',${i},'${day}')">✕</button></div></div>`;
+      h+=`<div class="meal-item"><div><div style="font-size:.86rem;color:var(--text)">${e.name}</div><div style="font-size:.76rem;color:var(--text-muted)">${det.join(' · ')}</div></div><div style="display:flex;align-items:center;gap:5px"><div style="font-size:.86rem;font-weight:600;color:var(--success)">${e.cals?'-'+e.cals+' kcal':''}</div><button style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--purple)" onclick="editExercise('${secName}',${i},'${day}')" title="Edit">✏️</button><button class="meal-item-del" onclick="delExercise('${secName}',${i},'${day}')">✕</button></div></div>`;
     });
     h+=`<button class="add-food-btn" onclick="openExModal('${secName}')">+ Add to ${secName}</button>`;
     sec.innerHTML=h;c.appendChild(sec);
@@ -1495,6 +1564,15 @@ function addExercise(){
   const weight=parseFloat(document.getElementById('ex-wt-inp').value)||0;
   const isFav=document.getElementById('ex-fav-chk').checked;
   if(!name){showToast('Enter an exercise name!');return;}
+  // EDIT MODE — update existing entry instead of adding new
+  if(editExTarget){
+    const {gIdx,section:eSec}=editExTarget;
+    S.exercises[eSec][gIdx]={...S.exercises[eSec][gIdx],name,dur,cals,sets,reps,weight};
+    editExTarget=null;
+    closeModal('ex-modal');
+    save();renderExercisesForDay();renderExCalendar();
+    showToast('Exercise updated! ✅');return;
+  }
   if(!S.exercises)S.exercises={};if(!S.exercises[section])S.exercises[section]=[];
   const now=getArubaDate();const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
   const logDay=selectedExDay||todayAruba();
